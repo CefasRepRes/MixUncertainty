@@ -1,0 +1,41 @@
+#' ---
+#' title: "Test uncertainty functions"
+#' author: "Matthew Pace"
+#' date: "April 2023"
+#' ---
+#'
+#' Summary
+#' =======
+#'
+#' This script serves to test functions that sample uncertainty from fitted
+#' probability distributions for mixed fisheries data structures.
+
+# remotes::install_github("flr/FLFleet")
+
+knitr::opts_chunk$set(fig.width=9, fig.height=9)
+
+library(TMB)
+library(FLCore)
+library(FLFleet)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(foreach)
+
+#' File paths
+#' ========================
+
+GithubPath <- "C:/Users/MP14/Documents/GitHub"
+remotes::install_local(file.path(GithubPath,"MixUncertainty/MixUncertainty"))
+
+library(MixUncertainty)
+
+#' Source data and functions
+#' =========================
+
+load("FLFleets.RData")
+source(file.path(GithubPath, "R/plot_model_fit_forecast_ggplot.R"))
+
+nyrs <- 10
+datayear <- 2021
+
