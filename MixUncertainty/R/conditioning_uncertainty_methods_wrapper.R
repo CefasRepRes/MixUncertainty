@@ -24,22 +24,28 @@
 fitMVNhurdle <- function(dat, rw) {
 
   ## build data object
-  data <- list (dat = t(dat))
+  data <- list (code = "E",
+                dat = t(dat))
 
   ## build parameters object
-  parameters <- list(logSdMVN = rep(0,nrow(rw)),
+  parameters <- list(rw = rw,
+                     logSdMVN = rep(0,nrow(rw)),
                      logitRho = 0,
-                     logTau   = 0,
                      mu         = rep(0,nrow(rw)),
                      logitARrho = rep(0,nrow(rw)),
+                     logSdObs = 0,
+                     logTau   = 0,
                      logb0      = 0,
                      logb1      = 0,
-                     rw = rw)
+                     dat_missing = vector(mode = "numeric"))
+
+  map1 <- list(logSdObs = as.factor(NA))
 
   obj <- tryCatch({MakeADFun(data,
                              parameters,
                              random = "rw",
-                             DLL = "fit_Dirichlet_MVN_AR1_missing_hurdle_nminus1traj",
+                             DLL = "MixUncertainty",
+                             map = map1,
                              silent = TRUE)},
                   error = function(e)e)
 
@@ -49,7 +55,8 @@ fitMVNhurdle <- function(dat, rw) {
                           control = list(eval.max = 1000, iter.max = 1000))},
                   error = function(e)e)
 
-  sdr <- sdreport(obj)
+  sdr <- tryCatch({sdreport(obj)},
+                  error = function(e)e)
 
   return(list(sdr = sdr,
               opt = opt,
@@ -77,21 +84,29 @@ fitMVNhurdle <- function(dat, rw) {
 fitNhurdle <- function(dat, rw) {
 
   ## build data object
-  data <- list (dat = t(dat))
+  data <- list (code = "F",
+                dat = t(dat))
 
   ## build parameters object
-  parameters <- list(logSdMVN = rep(0,nrow(rw)),
-                     logTau   = 0,
+  parameters <- list(rw = rw,
+                     logSdMVN = rep(0,nrow(rw)),
+                     logitRho = 0,
                      mu         = rep(0,nrow(rw)),
                      logitARrho = rep(0,nrow(rw)),
-                     logb0      = 0,
-                     logb1      = 0,
-                     rw = rw)
+                     logSdObs = 0,
+                     logTau = 0,
+                     logb0  = 0,
+                     logb1  = 0,
+                     dat_missing = vector(mode = "numeric"))
+
+  map1 <- list(logitRho = as.factor(NA),
+               logSdObs = as.factor(NA))
 
   obj <- tryCatch({MakeADFun(data,
                              parameters,
                              random = "rw",
-                             DLL = "fit_Dirichlet_N_AR1_missing_hurdle_nminus1traj",
+                             DLL = "MixUncertainty",
+                             map = map1,
                              silent = TRUE)},
                   error = function(e)e)
 
@@ -101,7 +116,8 @@ fitNhurdle <- function(dat, rw) {
                           control = list(eval.max = 1000, iter.max = 1000))},
                   error = function(e)e)
 
-  sdr <- sdreport(obj)
+  sdr <- tryCatch({sdreport(obj)},
+                  error = function(e)e)
 
   return(list(sdr = sdr,
               opt = opt,
@@ -129,23 +145,29 @@ fitNhurdle <- function(dat, rw) {
 fitNhurdle_fixARrho <- function(dat, rw, logitARrho) {
 
   ## build data object
-  data <- list (dat = t(dat))
+  data <- list (code = "F",
+                dat = t(dat))
 
   ## build parameters object
-  parameters <- list(logSdMVN = rep(0,nrow(rw)),
-                     logTau   = 0,
+  parameters <- list(rw = rw,
+                     logSdMVN = rep(0,nrow(rw)),
+                     logitRho = 0,
                      mu         = rep(0,nrow(rw)),
                      logitARrho = rep(logitARrho,nrow(rw)),
+                     logSdObs = 0,
+                     logTau   = 0,
                      logb0      = 0,
                      logb1      = 0,
-                     rw = rw)
+                     dat_missing = vector(mode = "numeric"))
 
-  map1 <- list(logitARrho = rep(as.factor(NA), nrow(rw)))
+  map1 <- list(logitRho = as.factor(NA),
+               logitARrho = rep(as.factor(NA), nrow(rw)),
+               logSdObs = as.factor(NA))
 
   obj <- tryCatch({MakeADFun(data,
                              parameters,
                              random = "rw",
-                             DLL = "fit_Dirichlet_N_AR1_missing_hurdle_nminus1traj",
+                             DLL = "MixUncertainty",
                              silent = TRUE,
                              map = map1)},
                   error = function(e)e)
@@ -156,7 +178,8 @@ fitNhurdle_fixARrho <- function(dat, rw, logitARrho) {
                           control = list(eval.max = 1000, iter.max = 1000))},
                   error = function(e)e)
 
-  sdr <- sdreport(obj)
+  sdr <- tryCatch({sdreport(obj)},
+                  error = function(e)e)
 
   return(list(sdr = sdr,
               opt = opt,
@@ -184,23 +207,30 @@ fitNhurdle_fixARrho <- function(dat, rw, logitARrho) {
 fitNhurdle_fixb0b1 <- function(dat, rw, logb0, logb1) {
 
   ## build data object
-  data <- list (dat = t(dat))
+  data <- list (code = "F",
+                dat = t(dat))
 
   ## build parameters object
-  parameters <- list(logSdMVN = rep(0,nrow(rw)),
-                     logTau   = 0,
+  parameters <- list(rw = rw,
+                     logSdMVN = rep(0,nrow(rw)),
+                     logitRho = 0,
                      mu         = rep(0,nrow(rw)),
                      logitARrho = rep(0,nrow(rw)),
+                     logSdObs = 0,
+                     logTau   = 0,
                      logb0      = logb0,
                      logb1      = logb1,
-                     rw = rw)
+                     dat_missing = vector(mode = "numeric"))
 
-  map1 <- list(logb0 = as.factor(NA), logb1 = as.factor(NA))
+  map1 <- list(logitRho = as.factor(NA),
+               logSdObs = as.factor(NA),
+               logb0 = as.factor(NA),
+               logb1 = as.factor(NA))
 
   obj <- tryCatch({MakeADFun(data,
                              parameters,
                              random = "rw",
-                             DLL = "fit_Dirichlet_N_AR1_missing_hurdle_nminus1traj",
+                             DLL = "MixUncertainty",
                              silent = TRUE,
                              map = map1)},
                   error = function(e)e)
@@ -211,7 +241,8 @@ fitNhurdle_fixb0b1 <- function(dat, rw, logb0, logb1) {
                           control = list(eval.max = 1000, iter.max = 1000))},
                   error = function(e)e)
 
-  sdr <- sdreport(obj)
+  sdr <- tryCatch({sdreport(obj)},
+                  error = function(e)e)
 
   return(list(sdr = sdr,
               opt = opt,
@@ -239,18 +270,32 @@ fitNhurdle_fixb0b1 <- function(dat, rw, logb0, logb1) {
 fitMVNDirrw <- function(dat, rw) {
 
   ## build data object
-  data <- list (dat = t(dat))
+  data <- list (code = "C",
+                dat = t(dat))
 
   ## build parameters object
-  parameters <- list(logSdMVN = rep(0,nrow(rw)),
+  parameters <- list(rw = rw,
+                     logSdMVN = rep(0,nrow(rw)),
                      logitRho = 0,
+                     mu = 0,
+                     logitARrho = 0,
+                     logSdObs = 0,
                      logTau   = 0,
-                     rw = rw)
+                     logb0 = 0,
+                     logb1 = 0,
+                     dat_missing = vector(mode = "numeric"))
+
+  map1 <- list(mu = as.factor(NA),
+               logitARrho = as.factor(NA),
+               logSdObs = as.factor(NA),
+               logb0 = as.factor(NA),
+               logb1 = as.factor(NA))
 
   obj <- tryCatch({MakeADFun(data,
                              parameters,
                              random = "rw",
-                             DLL = "fit_Dirichlet_rw_missing",
+                             DLL = "MixUncertainty",
+                             map = map1,
                              silent = TRUE)},
                   error = function(e)e)
 
@@ -260,7 +305,8 @@ fitMVNDirrw <- function(dat, rw) {
                           control = list(eval.max = 1000, iter.max = 1000))},
                   error = function(e)e)
 
-  sdr <- sdreport(obj)
+  sdr <- tryCatch({sdreport(obj)},
+                  error = function(e)e)
 
   return(list(sdr = sdr,
               opt = opt,
@@ -288,17 +334,33 @@ fitMVNDirrw <- function(dat, rw) {
 fitNDirrw <- function(dat, rw) {
 
   ## build data object
-  data <- list (dat = t(dat))
+  data <- list (code = "D",
+                dat = t(dat))
 
   ## build parameters object
-  parameters <- list(logSdMVN = rep(0,nrow(rw)),
+  parameters <- list(rw = rw,
+                     logSdMVN = rep(0,nrow(rw)),
+                     logitRho = 0,
+                     mu = 0,
+                     logitARrho = 0,
+                     logSdObs = 0,
                      logTau   = 0,
-                     rw = rw)
+                     logb0 = 0,
+                     logb1 = 0,
+                     dat_missing = vector(mode = "numeric"))
+
+  map1 <- list(logitRho = as.factor(NA),
+               mu = as.factor(NA),
+               logitARrho = as.factor(NA),
+               logSdObs = as.factor(NA),
+               logb0 = as.factor(NA),
+               logb1 = as.factor(NA))
 
   obj <- tryCatch({MakeADFun(data,
                              parameters,
                              random = "rw",
-                             DLL = "fit_Dirichlet_rw_missing_nocorr",
+                             DLL = "MixUncertainty",
+                             map = map1,
                              silent = TRUE)},
                   error = function(e)e)
 
@@ -308,10 +370,10 @@ fitNDirrw <- function(dat, rw) {
                           control = list(eval.max = 1000, iter.max = 1000))},
                   error = function(e)e)
 
-  sdr <- sdreport(obj)
+  sdr <- tryCatch({sdreport(obj)},
+                  error = function(e)e)
 
   return(list(sdr = sdr,
               opt = opt,
               obj = obj))
-
 }

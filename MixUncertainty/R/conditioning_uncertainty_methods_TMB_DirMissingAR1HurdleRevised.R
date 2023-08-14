@@ -72,7 +72,12 @@ TMB_DirMissingAR1Hurdle <- function(dat,
   # positive-definite
 
   ## Check identifiability of parameters
-  rerun <- checkFail(out, verbose)
+  checkout <- checkFail(out, verbose)
+  rerun  <- checkout$rerun
+  fail   <- checkout$fail
+  pdHess <- checkout$pdHess
+  nans   <- checkout$nans
+  conv   <- checkout$conv
 
   if(rerun) {
     if (verbose)
@@ -85,30 +90,47 @@ TMB_DirMissingAR1Hurdle <- function(dat,
     }
 
     ## Check identifiability of parameters
-    rerun <- checkFail(out, verbose)
+    checkout <- checkFail(out, verbose)
+    rerun  <- checkout$rerun
 
-  } else {
+  }
+
+  ## check optimisation
+  if(!rerun & (verbose | makeLog))
+    logs <- checkOpt(out, verbose, makeLog)
+
+  # If random walk hessian is not positive definite with Gaussian distributed
+  # intervals on the latent process, check if key parameters are identifiable in
+  # either MVN or univariate normal models.
+
+  if(rerun & !hurdle) {
+
+    ## if both multivariate and univariate methods cannot generate forecasts
+    ## then fail!
+    if ((fail | nans) & (checkout$fail | checkout$nans)) {
+      if (makeLog) {
+        logs <- "Dir - failed"
+      } else {
+        logs <- NULL
+      }
+      return(list(res  = NULL,
+                  logs = logs,
+                  plots = NULL))
+    }
+
+    ## otherwise, choose the better of the two methods
+    if(which.max(c(sum(pdHess, conv), sum(checkout$pdHess, checkout$conv))) == 1) {
+      out <- fitMVNDirrw(dat, rw)
+    }
 
     ## check optimisation
     if(verbose | makeLog)
       logs <- checkOpt(out, verbose, makeLog)
-
   }
 
   # If hurdle hessian is not positive definite with Gaussian distributed intervals
   # on the latent process, use fixed values for AR1 process OR Bernoulli
   # observation. Select model with lowest AIC
-
-  if(rerun & !hurdle) {
-    if (makeLog) {
-      logs <- "Dir - failed"
-    } else {
-      logs <- NULL
-    }
-    return(list(res  = NULL,
-                logs = logs,
-                plots = NULL))
-  }
 
   ## Check identifiability of parameters
   if(rerun & hurdle) {
@@ -118,10 +140,10 @@ TMB_DirMissingAR1Hurdle <- function(dat,
     out <- list(out1 = fitNhurdle_fixARrho(dat, rw, logitARrho = 1.75),
                 out2 = fitNhurdle_fixb0b1(dat, rw, logb0 = 2.3, logb1 = 2))
 
-    checkout <- c(checkFail(out$out1, FALSE), checkFail(out$out2, FALSE))
+    checklist <- c(checkFail(out$out1, FALSE)$rerun, checkFail(out$out2, FALSE)$rerun)
 
     ## If both fail, stop function here
-    if (sum(checkout) == 0) {
+    if (sum(checklist) == 2) {
       if (verbose)
         cat(" Dirichlet failed |")
 
@@ -136,8 +158,8 @@ TMB_DirMissingAR1Hurdle <- function(dat,
     }
 
     ## If only one succeeds, select this one
-    if (sum(checkout) == 1) {
-      out <- out[[which(checkout)]]
+    if (sum(checklist) == 1) {
+      out <- out[[which(!checklist)]]
 
       ## check optimisation
       if(verbose | makeLog)
@@ -145,10 +167,10 @@ TMB_DirMissingAR1Hurdle <- function(dat,
     }
 
     # If both positive-definite hessian, choose model with lowest AIC
-    if (sum(checkout) == 2) {
+    if (sum(checklist) == 0) {
 
-      outIdx<- which.min(simpleAIC(out$out1$opt),
-                         simpleAIC(out$out2$opt))
+      outIdx<- which.min(c(simpleAIC(out$out1$opt),
+                           simpleAIC(out$out2$opt)))
       out <- out[[outIdx]]
 
       ## check optimisation
@@ -199,7 +221,7 @@ TMB_DirMissingAR1Hurdle <- function(dat,
   ## make diagnostic plots to explore quality of fit and forecast
   if (makePlots) {
 
-    pred_quantiles <- array(NA, dim = c(nyear_forecast, nrow(data$dat), 3))
+    pred_quantiles <- array(NA, dim = c(nyear_forecast, ncol(dat), 3))
     for(i in 1:dim(pred_quantiles)[1]) {
       for(j in 1:dim(pred_quantiles)[2]) {
         pred_quantiles[i,j,] <- quantile(resvariates[i,j,], na.rm = TRUE,
@@ -207,7 +229,13 @@ TMB_DirMissingAR1Hurdle <- function(dat,
       }
     }
 
-    p1 <- tryCatch(plot_forecast_Dir(data, pl, plsd, pred_quantiles, years, invlogitfun = invlogit), error = function(e)e)
+    p1 <- tryCatch(plot_forecast_Dir(list(dat = t(dat)),
+                                     pl,
+                                     plsd,
+                                     pred_quantiles,
+                                     fillyear,
+                                     invlogitfun = invlogit),
+                   error = function(e)e)
 
   } else {
     p1 <- NULL

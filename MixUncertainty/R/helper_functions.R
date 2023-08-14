@@ -109,24 +109,47 @@ checkOpt <- function(x, verbose, makeLog) {
 #' Check for failure. Return code.
 #'
 #' @param x a list
+#' @param verbose (logical) should progress/summaries be printed? Defaults to
+#'                \code{TRUE}
 
 checkFail <- function(x, verbose) {
 
   if (is.null(x$opt$convergence)) {
     if (verbose)
       cat(" Dirichlet failed |")
-    rerun <- TRUE
+    rerun  <- TRUE
+    fail   <- TRUE
+    pdHess <- FALSE
+    nans   <- FALSE
+    conv   <- FALSE
 
   } else if (!x$sdr$pdHess) {
     if (verbose)
       cat(" Hessian not positive-definite |")
-    rerun <- TRUE
+    rerun  <- TRUE
+    fail   <- FALSE
+    pdHess <- FALSE
+
+    xplsd   <- as.list(x$sdr,"Std")
+    nans   <- any(is.nan(xplsd$rw))
+    conv   <- x$opt$convergence == 0
 
   } else {
-    rerun <- FALSE
+
+    rerun  <- FALSE
+    fail   <- FALSE
+    pdHess <- TRUE
+
+    xplsd  <- as.list(x$sdr,"Std")
+    nans   <- any(is.nan(xplsd$rw))
+    conv   <- x$opt$convergence == 0
   }
 
-  return(rerun)
+  return(list(rerun  = rerun,
+              fail   = fail,
+              pdHess = pdHess,
+              nans   = nans,
+              conv   = conv))
 }
 
 #' Calculate AIC from an optimisation summary
