@@ -85,19 +85,28 @@ invlogit <- function(x) {
 
 checkOpt <- function(x, verbose, makeLog) {
 
+  ## extract model structure
+  code <- x$obj$env$data$code
+  if(code == "A") mod <- "MVN_AR1_N"
+  if(code == "B") mod <- "N_AR1_N"
+  if(code == "C") mod <- "MVN_RW_Dir"
+  if(code == "D") mod <- "N_RW_Dir"
+  if(code == "E") mod <- "MVN_AR1_Hurdle"
+  if(code == "F") mod <- "N_AR1_Hurdle"
+
   ## check optimisation
   if(x$opt$convergence > 0) {
     if (verbose)
       cat(" no Dirichlet convergence |")
     if (makeLog)
-      logs <- "Dir - no convergence"
+      logs <- paste0(mod, " - no convergence")
     else
       logs <- NULL
   } else {
     if (verbose)
       cat(" Dirichlet success |")
     if (makeLog)
-      logs <- "Dir - success"
+      logs <- paste0(mod, " - success")
     else
       logs <- NULL
   }
