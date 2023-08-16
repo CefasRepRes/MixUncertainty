@@ -228,11 +228,11 @@ setMethod(f = "uncertainty_quotashare",
                                             makePlots= makePlots))
 
                 if(makeLog) {
-                  logs  <- out$logs
-                  plots <- out$plots
+                  logs[[stk]]  <- out$logs
+                  plots[[stk]] <- out$plots
                 } else {
-                  logs  <- NULL
-                  plots <- out$plots
+                  logs[[stk]]  <- NULL
+                  plots[[stk]] <- out$plots
                 }
 
                 resvariates <- out$res
