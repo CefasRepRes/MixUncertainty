@@ -125,7 +125,7 @@ checkFail <- function(x, verbose) {
 
   if (is.null(x$opt$convergence)) {
     if (verbose)
-      cat(" Dirichlet failed |")
+      cat(" Model failed |")
     rerun  <- TRUE
     fail   <- TRUE
     pdHess <- FALSE
@@ -214,3 +214,52 @@ impute_cases <- function(dat) {
   return(t(dat2))
 }
 
+#' Simple function to check availability of catchability data
+#'
+#' Function takes a matrix of catchability time-series observations and checks
+#' whether there are sufficient observations to fit a time-series state-space
+#' model.
+#'
+#' @param qs A matrix of time-series observations for catchability data where
+#'            cols = years and rows = stocks
+#' @param qs_years A vector of years corresponding to catchability observations
+#' @param verbose description
+#' @param makeLog description
+#' @param makePlots description
+#'
+#' @return A list containing:
+#'
+#'         - 'sdr': a TMB report summary for the optimised model parameters,
+#'         - 'opt': a summary returned by the optimisation function,
+#'         - 'obj': the optimised TMB objective function
+
+checkCatchability <- function(logqs, qs_years, verbose, makeLog) {
+
+  run <- TRUE
+  logs <- NULL
+
+  ## cannot handle metiers with no data for last 3(?) years
+  if (sum(logqs[rownames(logqs) %in% tail(qs_years,3),], na.rm = TRUE) == 0) {
+    if (verbose) {
+      cat(" no data in last 3 years |")
+    }
+    if (makeLog) {
+      logs <- sapply(colnames(logqs), function(x) "no data < 3 yrs", USE.NAMES = TRUE)
+    }
+    run <- FALSE
+  }
+
+  ## cannot handle stocks with fewer than 3 data points
+  if (all(colSums(!is.na(logqs)) < 3)) {
+    if (verbose) {
+      cat(" fewer than 3 data points |")
+    }
+    if (makeLog) {
+      logs <- sapply(colnames(logqs), function(x) "n < 3", USE.NAMES = TRUE)
+    }
+    run <- FALSE
+  }
+  return(list(logqs = logqs,
+              logs  = logs,
+              run   = run))
+}
