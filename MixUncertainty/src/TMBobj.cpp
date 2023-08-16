@@ -48,7 +48,7 @@ Type objective_function<Type>::operator()(){
   DATA_STRING(code);
 
   // read in data
-  DATA_ARRAY(dat); // matrix: stocks x years
+  DATA_ARRAY(dat); // matrix: variable x years
 
   // Read parameters
   // ===============
@@ -136,12 +136,17 @@ Type objective_function<Type>::operator()(){
     }
 
     // Compute negative log-likelihood
+    // -------------------------------
+
     using namespace density;
     MVNORM_t<Type> neg_log_density(MVNcov);
 
-    // Random walk process
+    // calculate density at start of AR1 process
+    nll += neg_log_density(rw.col(0) - mu);
+
+    // Stationary AR process on the expectation
     for (int i = 1; i < nyear; ++i){
-      nll += neg_log_density(rw.col(i) - rw.col(i-1));
+      nll += neg_log_density((rw.col(i) - (mu + ARrho * (rw.col(i-1) - mu)))/sqRho);
     }
 
     // Observation process
@@ -174,15 +179,27 @@ Type objective_function<Type>::operator()(){
       }
     }
 
+    // prepare variance-covariance matrix
+    // ----------------------------------
+
+    matrix <Type> MVNcov(nvar, nvar);
+    MVNcov.setZero();
+    for(int i = 0; i < nvar; i++) {
+          MVNcov(i,i) = pow(SdMVN(i), 2); // variances
+    }
+
     // Compute negative log-likelihood
     // -------------------------------
 
-    // Random walk process
-    for (int i = 1; i < nyear; ++i){
-      Type rwi       = rw(0,i);
-      Type rwiminus1 = rw(0,i-1);
+    using namespace density;
+    MVNORM_t<Type> neg_log_density(MVNcov);
 
-      nll -= dnorm(rwi, rwiminus1, SdMVN(0), true);
+    // calculate density at start of AR1 process
+    nll += neg_log_density(rw.col(0) - mu);
+
+    // Stationary AR process on the expectation
+    for (int i = 1; i < nyear; ++i){
+      nll += neg_log_density((rw.col(i) - (mu + ARrho * (rw.col(i-1) - mu)))/sqRho);
     }
 
     // Observation process
@@ -192,6 +209,9 @@ Type objective_function<Type>::operator()(){
 
       nll -= dnorm(dati, rwi, SdObs(0), true);
     }
+
+    // report variance
+    REPORT(MVNcov);
 
     // report fitted missing values
     REPORT(dat_missing);
