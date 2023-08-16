@@ -40,7 +40,7 @@
 #' @export
 
 setGeneric("uncertainty_effortshare", function(fleets,
-                                               method = "TMB_Dirrw",
+                                               method = "TMB_DirMissingAR1Hurdle",
                                                datayear      = NULL,
                                                TACyear       = NULL,
                                                nyrs          = 4,
@@ -56,7 +56,7 @@ setGeneric("uncertainty_effortshare", function(fleets,
 setMethod(f = "uncertainty_effortshare",
           signature = signature(fleets = "FLFleetExt"),
           definition = function(fleets,
-                                method = "TMB_Dirrw",
+                                method = "TMB_DirMissingAR1Hurdle",
                                 datayear      = NULL,
                                 TACyear       = NULL,
                                 nyrs          = 4,
@@ -69,7 +69,7 @@ setMethod(f = "uncertainty_effortshare",
             if(dims(fleets[[f]])$iter < 2)
               stop("input should have > 1 iterations to store sampled uncertainty")
 
-
+            stop("Methods not yet implemented for 'FLFleetExt'")
 
           })
 
@@ -78,7 +78,7 @@ setMethod(f = "uncertainty_effortshare",
 setMethod(f = "uncertainty_effortshare",
           signature = signature(fleets = "FLFleetsExt"),
           definition = function(fleets,
-                                method = "TMB_Dirrw",
+                                method = "TMB_DirMissingAR1Hurdle",
                                 datayear      = NULL,
                                 TACyear       = NULL,
                                 nyrs          = 4,
@@ -128,7 +128,7 @@ setMethod(f = "uncertainty_effortshare",
 setMethod(f = "uncertainty_effortshare",
           signature = signature(fleets = "FLFleet"),
           definition = function(fleets,
-                                method = "TMB_Dirrw",
+                                method = "TMB_DirMissingAR1Hurdle",
                                 datayear      = NULL,
                                 TACyear       = NULL,
                                 nyrs          = 4,
@@ -252,7 +252,7 @@ setMethod(f = "uncertainty_effortshare",
 setMethod(f = "uncertainty_effortshare",
           signature = signature(fleets = "FLFleets"),
           definition = function(fleets,
-                                method = "TMB_Dirrw",
+                                method = "TMB_DirMissingAR1Hurdle",
                                 datayear      = NULL,
                                 TACyear       = NULL,
                                 nyrs          = 4,
