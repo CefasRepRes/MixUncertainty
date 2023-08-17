@@ -53,6 +53,9 @@ plot_fit_MVN <- function(data, pl, plsd, years) {
 #' @param pred_quantiles array of forecast value summaries at the 2.5, 50, 97.5
 #'                       centiles.
 #' @param years vector of years associated with observations and forecasts
+#'
+#' @importFrom tidyr gather
+#' @import ggplot2
 
 plot_forecast_MVN <- function(data, pl, plsd, pred_quantiles, years) {
 
@@ -157,6 +160,9 @@ plot_forecast_MVN <- function(data, pl, plsd, pred_quantiles, years) {
 #' @param years vector of years associated with observations and forecasts
 #' @param invlogitfun function to perform multinomial inverse logit transformation
 #'                    of latent process values.
+#'
+#' @importFrom tidyr gather
+#' @import ggplot2
 
 plot_fit_Dir <- function(data, pl, plsd, years, invlogitfun) {
 
@@ -225,6 +231,9 @@ plot_fit_Dir <- function(data, pl, plsd, years, invlogitfun) {
 #' @param years vector of years associated with observations and forecasts
 #' @param invlogitfun function to perform multinomial inverse logit transformation
 #'                    of latent process values.
+#'
+#' @importFrom tidyr gather
+#' @import ggplot2
 
 plot_forecast_Dir <- function(data, pl, plsd, pred_quantiles, years, invlogitfun) {
 
