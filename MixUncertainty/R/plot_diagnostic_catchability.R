@@ -124,7 +124,7 @@ setMethod(f = "diagnostic_catchability",
             if (is.null(fl))
               stop("Fleet name 'fl' must be specified")
 
-            if (c1 == c1)
+            if (c1 == c2)
               stop("catch names 'c1' and 'c2' must be different")
 
             if (!(fl %in% names(fleets)))

@@ -37,7 +37,8 @@ setMethod(f = "diagnostic_quotashare",
                                 TACyear  = NULL,
                                 stk      = NULL) {
 
-            require(dplyr)
+            if (is.null(stk))
+              stop("'stk' must be specified")
 
             # ----------------------------------#
             # Process estimated quota-share data
