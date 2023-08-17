@@ -124,6 +124,12 @@ setMethod(f = "diagnostic_catchability",
             if (is.null(fl))
               stop("Fleet name 'fl' must be specified")
 
+            if (c1 == c1)
+              stop("catch names 'c1' and 'c2' must be different")
+
+            if (!(fl %in% names(fleets)))
+              stop("'fl' must be the name of a fleet in 'fleets'")
+
             ## subset for specific fleet
             fleets_fl <- fleets[[fl]]
 

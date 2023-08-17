@@ -7,18 +7,27 @@
 #' Stochastically sample future catchability from historic estimates
 #'
 #' Function takes a \code{FLFleet}, \code{FLFleets}, \code{FLFleetExt} or a
-#' \code{FLFleetsExt} object and ...
+#' \code{FLFleetsExt} object and fits a statistical model to historic
+#' observations of metier-stock catchability for each fleet. The catchability
+#' for future years is a stochastic forecast from fitted model parameters.
 #'
 #' @param fleets An object of class \code{FLFleet}, \code{FLFleets},
 #'               \code{FLFleetExt} or a \code{FLFleetsExt}.
+#' @param method (Character) The algorithm used to fit the statistical model and
+#'               generate stochastic forecasts. Using the default is highly
+#'               recommended.
 #' @param datayear (Integer) The final data year in the fleets object
 #' @param TACyear (Integer) The projection year in the fleets object
 #' @param nyrs (Integer) The number of historic years used to estimate
 #'             future catchability. Defaults to 3. Recommend > 10 if
 #'             using a random walk model.
 #' @param deterministic (Logical) Should the results for first iteration be
-#'                      a simple mean of the historical period? Defaults
+#'                      a deterministic average of the historical period? Defaults
 #'                      to \code{TRUE}
+#' @param detMethod (Character) The method to calculate the deterministic average.
+#'                  If "mean" then a simple mean of the most recent three data years
+#'                  is used. Otherwise, the median of the stochastic forecast is
+#'                  used.
 #' @param verbose (Logical) Should the function print progress? Defaults
 #'                to \code{TRUE}
 #' @param makeLog (Logical) Should the function generate a log of the methods
@@ -32,7 +41,7 @@
 #' @export
 
 setGeneric("uncertainty_catchability", function(fleets,
-                                                method        = NULL,
+                                                method        = "TMB_logMVNrw",
                                                 datayear      = NULL,
                                                 TACyear       = NULL,
                                                 nyrs          = 3,
@@ -60,7 +69,7 @@ setGeneric("uncertainty_catchability", function(fleets,
 setMethod(f = "uncertainty_catchability",
           signature = signature(fleets = "FLFleetExt"),
           definition = function(fleets,
-                                method        = NULL,
+                                method        = "TMB_logMVNrw",
                                 datayear      = NULL,
                                 TACyear       = NULL,
                                 nyrs          = 3,
@@ -82,7 +91,7 @@ setMethod(f = "uncertainty_catchability",
 setMethod(f = "uncertainty_catchability",
           signature = signature(fleets = "FLFleetsExt"),
           definition = function(fleets,
-                                method        = NULL,
+                                method        = "TMB_logMVNrw",
                                 datayear      = NULL,
                                 TACyear       = NULL,
                                 nyrs          = 3,
@@ -140,7 +149,7 @@ setMethod(f = "uncertainty_catchability",
 setMethod(f = "uncertainty_catchability",
           signature = signature(fleets = "FLFleet"),
           definition = function(fleets,
-                                method        = NULL,
+                                method        = "TMB_logMVNrw",
                                 datayear      = NULL,
                                 TACyear       = NULL,
                                 nyrs          = 3,
@@ -240,7 +249,7 @@ setMethod(f = "uncertainty_catchability",
 setMethod(f = "uncertainty_catchability",
           signature = signature(fleets = "FLFleets"),
           definition = function(fleets,
-                                method        = NULL,
+                                method        = "TMB_logMVNrw",
                                 datayear      = NULL,
                                 TACyear       = NULL,
                                 nyrs          = 3,

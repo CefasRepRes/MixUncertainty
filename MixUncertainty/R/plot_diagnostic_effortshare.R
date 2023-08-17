@@ -82,3 +82,30 @@ setMethod(f = "diagnostic_effortshare",
               theme_bw()
 
           })
+
+## if fleets == "FLFleetsExt"
+#' @rdname diagnostic_effortshare
+setMethod(f = "diagnostic_effortshare",
+          signature = signature(fleets = "FLFleets"),
+          definition = function(fleets,
+                                nyrs     = 4,
+                                datayear = NULL,
+                                TACyear  = NULL,
+                                fl       = NULL) {
+
+            if (is.null(fl))
+              stop("Fleet name 'fl' must be specified")
+
+            if (!(fl %in% names(fleets)))
+              stop("'fl' must be the name of a fleet in 'fleets'")
+
+            ## subset for specific fleet
+            fleets_fl <- fleets[[fl]]
+
+            ## run plotting function
+            diagnostic_effortshare(fleets   = fleets_fl,
+                                   nyrs     = nyrs,
+                                   datayear = datayear,
+                                   TACyear  = TACyear)
+
+          })

@@ -13,6 +13,9 @@
 #'
 #' @param fleets An object of class \code{FLFleet}, \code{FLFleets},
 #'               \code{FLFleetExt} or a \code{FLFleetsExt}.
+#' @param method (Character) The algorithm used to fit the statistical model and
+#'               generate stochastic forecasts. Using the default is highly
+#'               recommended.
 #' @param datayear (Integer) The final data year in the fleets object
 #' @param TACyear (Integer) The projection year in the fleets object
 #' @param nyrs (Integer) The number of historic years used to estimate

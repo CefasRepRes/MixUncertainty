@@ -13,8 +13,9 @@
 #'
 #' @param fleets An object of class \code{FLFleet}, \code{FLFleets},
 #'               \code{FLFleetExt} or a \code{FLFleetsExt}.
-#' @param method (Character) The method to be used to estimate future
-#'               quota share from historic patterns. Default is "null"
+#' @param method (Character) The algorithm used to fit the statistical model and
+#'               generate stochastic forecasts. Using the default is highly
+#'               recommended.
 #' @param quotashare (Optional) A data frame containing: year, stock, fleet
 #'                   and landingshare.
 #' @param datayear (Integer) The final data year in the fleets object
@@ -24,6 +25,8 @@
 #' @param deterministic (Logical) Should the results for first iteration be
 #'                      a simple mean of the historical period? Defaults
 #'                      to \code{TRUE}
+#' @param deterministic_yrs (Integer) The number of recent data years to use in
+#'                          the deterministic calculation. Defaults to 3.
 #' @param verbose (Logical) Should the function print progress? Defaults
 #'                to \code{TRUE}
 #' @param makeLog (Logical) Should the function record model fitting and forecasting
@@ -200,9 +203,9 @@ setMethod(f = "uncertainty_quotashare",
                                           value = landingshare)
 
               ## remove fleets that catch zero stock across timeseries
-              stkcatches      <- stkcatches[,colnames(stkcatches) != "year"]
+              stkcatches      <- stkcatches[,colnames(stkcatches) != "year", drop = FALSE]
               landsharefleets <- which(colSums(stkcatches, na.rm = TRUE) > 0)
-              landsharedata   <- stkcatches[,landsharefleets]
+              landsharedata   <- stkcatches[,landsharefleets, drop = FALSE]
 
               ## Consider NAs to be zeros
               landsharedata[is.na(landsharedata)] <- 0

@@ -21,6 +21,10 @@
 #' @param deterministic (Logical) Should the results for first iteration be
 #'                      a simple mean of the historical period? Defaults
 #'                      to \code{TRUE}
+#' @param detMethod (Character) The method to calculate the deterministic average.
+#'                  If "mean" then a simple mean of the most recent three data years
+#'                  is used. Otherwise, the median of the stochastic forecast is
+#'                  used.
 #' @param verbose (Logical) Should the function print progress? Defaults
 #'                to \code{TRUE}
 #' @param makeLog (Logical) Should the function generate a log of the methods
