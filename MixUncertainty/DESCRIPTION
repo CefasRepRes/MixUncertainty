@@ -9,7 +9,14 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Depends: TMB, FLCore
+Depends: 
+    TMB,
+    tidyr,
+    dplyr,
+    ggplot2,
+    FLCore,
+    FLFleet,
+    R (>= 2.10)
 Imports: tidyr, ggplot2
 LinkingTo: TMB, RcppEigen
 RoxygenNote: 7.2.3
