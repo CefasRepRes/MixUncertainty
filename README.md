@@ -107,7 +107,13 @@ $$\mathbf{y}\_t = \text{Dir}(\mathbf{\alpha}_t), \text{where } \mathbf{\alpha}_t
 
 $\tau$ is the time-invariant concentration parameter.
 
-One short-coming is that the Dirichlet distribution cannot accommodate zero observations. Hence, when data contain zero observations, a hurdle approach is used to model the observation process and an AR1 process is used to model the expectation.
+One short-coming is that the Dirichlet distribution cannot accommodate zero observations. Hence, when data contain zero observations, a hurdle approach is used to model the observation process and an AR1 process is used to model the expectation. The latent AR1 process is similar to the model defined for catchability:
+
+$$\text{logit~}\text{E}(\mathbf{y}\_t) = \mathbf{\mu} + \phi \left(\text{logit~}\text{E}(\mathbf{y}\_{t-1}) - \mathbf{\mu} \right) + \rho \mathbf{\eta_t}, \text{where } \mathbf{\eta_t} \sim \mathbf{N}(0, \Sigma),$$
+
+The hurdle observation process comprises Dirichlet observation noise for non-zero observations, while the incidence of non-zero observations follows a Bernoulli distribution with a probability $p$ of a non-zero observation for each compositional element that is related to the magnitude of the element
+
+$$\text{logit }p_{i,t} = \theta_0 + \theta_1 * \text{E}(y_{i,t})$$
 
 Similar to models for catchability, in cases of convergence issues, the models are simplified by fixing covariances to zero and therefore relaxing the assumption of multivariate dependency in process noise.
  
