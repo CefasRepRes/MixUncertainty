@@ -1,13 +1,13 @@
 # MixUncertainty
-An R package to stochastically forecast parameter values for mixed fisheries models from historic observations. Simple state-space time-series models are fitted to historic fleet parameter observations and future values are stochastically projected from the fitted latent process. MixUncertainty allows for the easy conditioning of fleet structures with uncertainty around key parameters:
+An R package to stochastically forecast parameter values for mixed fisheries models from historic observations. Simple state-space time-series models are fitted to historic fishing fleet parameter observations and future values are stochastically projected from the fitted latent process. MixUncertainty allows for the easy conditioning of fleet structures with uncertainty around three key parameters:
 
-- metier-stock **catchability**
-- metier proportional **effort-share**
-- fleet proportional stock **quota-share**
+- catchability of each stock for each metier (**catchability**)
+- proportional share of fleet effort across metiers (**effort-share**)
+- proportional share of stock quota across fleets (**quota-share**)
 
 MixUncertainty uses FLR libraries. Fleet data are expected to follow the `FLFleet`(s), `FLMetier`(s), `FLCatch`(es) hierarchy defined by the `FLFleet` package. Uncertainty conditioning methods depend on the `TMB` package. Optional figures are generated using `tidyr`, `plyr`, `ggplot2` and `cowplot`.
 
-# Installation
+## Installation
 MixUncertainty can be installed using the 'devtools' package
 
 ```{r}
@@ -15,7 +15,7 @@ install.packages("devtools")
 devtools::install_github("pacematt/MixUncertainty/MixUncertainty")
 ```
 
-# Examples
+## Application
 The example below uses a simple synthetic data set containing two fleets, three metiers and two stocks. Historic observations of catchability, effort-share and landings numbers are available for years 1 to 10, and estimates of future catchability and effort-share in years 11 and 12 are a simple mean of values for years 8 to 10. 
 
 ``` {r}
@@ -82,9 +82,14 @@ diagnostic_quotashare(fleets = out2$fleets, quotashare = out3$quotashare, stk = 
 
 ```
 
-# Methods
-## Catchability
+## Methods
+### Catchability
+Within a given metier, catchability might be expected to co-vary among stocks, reflecting how changes in gear efficiency might have correlated impacts on stocks with similar morphologies and life-histories. The underlying vector of "true" catchabilities $\mathbf{q_t}$ at time $t$, where $\mathbf{q_t} = (q_{1,t}, ..., q_{s,t})$ for $s$ exploited stocks, follows an AR1 process on a log-scale with multivariate normal distributed increments $\eta$:
 
-## Metier effort-share
+$$log \mathbf{q_t} = log \mathbf{q_{t-1}} + \mathbf{\eta_t}, \text{~where~} \mathbf{\eta_t} ~ \mathbf{N}(0, \Sigma)$$
 
-## Fleet quota-share
+where $\Sigma$ is the variance-covaraince matrix for the multivariate normal distribution. The observation error 
+
+### Metier effort-share
+
+### Fleet quota-share
