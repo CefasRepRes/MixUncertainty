@@ -86,12 +86,28 @@ diagnostic_quotashare(fleets = out2$fleets, quotashare = out3$quotashare, stk = 
 ### Catchability
 Within a given metier, catchability might be expected to co-vary among stocks, reflecting how changes in gear efficiency might have correlated impacts on stocks with similar morphologies and life-histories. The underlying vector of "true" catchabilities $\mathbf{q}^{\ast}\_t$ at time $t$, where $\mathbf{q_t} = (q_{1,t}, ..., q_{s,t})$ for $s$ exploited stocks, follows an AR1 process on a log-scale with multivariate normal distributed noise $\eta$:
 
-$$\log \mathbf{q}^{\ast}\_t = \mathbf{\mu} + \phi \left(\log \mathbf{q}^{\ast}\_{t-1} - \mathbf{\mu} \right) + \rho \mathbf{\eta_t}, \text{where } \mathbf{\eta_t} \sim \mathbf{N}(0, \Sigma)$$
+$$\log \mathbf{q}^{\ast}\_t = \mathbf{\mu} + \phi \left(\log \mathbf{q}^{\ast}\_{t-1} - \mathbf{\mu} \right) + \rho \mathbf{\eta_t}, \text{where } \mathbf{\eta_t} \sim \mathbf{N}(0, \Sigma),$$
 
-where $\Sigma$ is the variance-covariance matrix for the multivariate normal distribution, $\mu$ is the stationary mean for each catchability element, $\phi$ is the AR1 correlation parameter, and $\rho = \sqrt(1 - \phi^2)$. The observation error $\epsilon_{i,t}$ is assumed to take a univariate normal distribution:
+$\Sigma$ is the variance-covariance matrix for the multivariate normal distribution, $\mu$ is the stationary mean for each catchability element, $\phi$ is the AR1 correlation parameter, and $\rho = \sqrt(1 - \phi^2)$. The observation error $\epsilon_{i,t}$ is assumed to take a univariate normal distribution:
 
 $$\log q_t = \log q^{\ast}\_{i,t} + \epsilon_{i,t}, \text{where } \epsilon_{i,t} \sim N(0, \sigma_i)$$
 
 In cases of model convergence issues, the model is simplified by fixing covariances to zero and therefore relaxing the assumption of multivariate dependency in process noise.
 
 ### Metier effort-share and fleet quota-share
+Metier effort-share and fleet quota-share are both compositional time-series. The data at each time increment are a vector $\mathbf{y}\_t = (y_{1,t}, \dots, y_{K,t})$, where $y_{1,t} + \dots + y_{K,t} = 1$ and $y_{i,t} \in \[0,1\]$. Two different models are adopted, depending on whether the data contain zero observations. 
+
+If all observations are non-zero, then the multinomial logit transformed expectation $E(\mathbf{y)\_t})$ is assumed to follow a random walk with multivariate normal distributed increments $\nu$:
+
+$$\text{logit~}\text{E}(\mathbf{y}\_t) = \text{logit~}\text{E}(\mathbf{y}\_{t-1}) + \mathbf{\nu}\_t, \text{where } \mathbf{\nu}\_t \sim \mathbf{N}(0, \Sigma),$$
+
+$\Sigma$ is the variance-covariance matrix for the multivariate normal distribution. Observations are modelled using the Dirichlet distribution
+
+$$\mathbf{y}\_t = \text{Dir}(\mathbf{\alpha}_t), \text{where } \mathbf{\alpha}_t = E(\mathbf{y}_t \cdot \tau)$$
+
+$\tau$ is the time-invariant concentration parameter.
+
+One short-coming is that the Dirichlet distribution cannot accommodate zero observations. Hence, when data contain zero observations, a hurdle approach is used to model the observation process and an AR1 process is used to model the expectation.
+
+Similar to models for catchability, in cases of convergence issues, the models are simplified by fixing covariances to zero and therefore relaxing the assumption of multivariate dependency in process noise.
+ 
