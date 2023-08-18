@@ -41,7 +41,8 @@ out1$logs
 ## check time-series of model fit (maximum likelihood estimate + 95% CI)
 out1$plots
 
-# generate figure showing covariance in observations and random draws for two stocks harvested by a give metier
+## generate figure showing covariance in observations and random draws for two stocks
+## harvested by a given metier
 diagnostic_catchability(out1$fleets, nyrs = 10, datayear = 10, TACyear = 12,
                         fl = "I", mt = "1ab", c1 = "A", c2 =  "B")
 ```
