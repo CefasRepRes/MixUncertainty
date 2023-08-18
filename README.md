@@ -84,12 +84,14 @@ diagnostic_quotashare(fleets = out2$fleets, quotashare = out3$quotashare, stk = 
 
 ## Methods
 ### Catchability
-Within a given metier, catchability might be expected to co-vary among stocks, reflecting how changes in gear efficiency might have correlated impacts on stocks with similar morphologies and life-histories. The underlying vector of "true" catchabilities $\mathbf{q_t}$ at time $t$, where $\mathbf{q_t} = (q_{1,t}, ..., q_{s,t})$ for $s$ exploited stocks, follows an AR1 process on a log-scale with multivariate normal distributed increments $\eta$:
+Within a given metier, catchability might be expected to co-vary among stocks, reflecting how changes in gear efficiency might have correlated impacts on stocks with similar morphologies and life-histories. The underlying vector of "true" catchabilities $\mathbf{q}^{\ast}\_t$ at time $t$, where $\mathbf{q_t} = (q_{1,t}, ..., q_{s,t})$ for $s$ exploited stocks, follows an AR1 process on a log-scale with multivariate normal distributed noise $\eta$:
 
-$$log \mathbf{q_t} = log \mathbf{q_{t-1}} + \mathbf{\eta_t}, \text{~where~} \mathbf{\eta_t} ~ \mathbf{N}(0, \Sigma)$$
+$$\log \mathbf{q}^{\ast}\_t = \mathbf{\mu} + \phi \left(\log \mathbf{q}^{\ast}\_{t-1} - \mathbf{\mu} \right) + \rho \mathbf{\eta_t}, \text{where } \mathbf{\eta_t} \sim \mathbf{N}(0, \Sigma)$$
 
-where $\Sigma$ is the variance-covaraince matrix for the multivariate normal distribution. The observation error 
+where $\Sigma$ is the variance-covariance matrix for the multivariate normal distribution, $\mu$ is the stationary mean for each catchability element, $\phi$ is the AR1 correlation parameter, and $\rho = \sqrt(1 - \phi^2)$. The observation error $\epsilon_{i,t}$ is assumed to take a univariate normal distribution:
 
-### Metier effort-share
+$$\log q_t = \log q^{\ast}\_{i,t} + \epsilon_{i,t}, \text{where } \epsilon_{i,t} \sim N(0, \sigma_i)$$
 
-### Fleet quota-share
+In cases of model convergence issues, the model is simplified by fixing covariances to zero and therefore relaxing the assumption of multivariate dependency in process noise.
+
+### Metier effort-share and fleet quota-share
