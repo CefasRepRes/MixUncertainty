@@ -1,5 +1,5 @@
 # MixUncertainty
-An R package to stochastically forecast parameter values for mixed fisheries models from historic observations. MixUncertainty allows for the easy conditioning of fleet structures with uncertainty around key parameters
+An R package to stochastically forecast parameter values for mixed fisheries models from historic observations. Simple state-space time-series models are fitted to historic parameter observations and future values are stochastically projected from the fitted latent process. MixUncertainty allows for the easy conditioning of fleet structures with uncertainty around key parameters
 
 - metier-stock **catchability**
 - metier proportional **effort-share**
@@ -18,6 +18,6 @@ devtools::install_github("pacematt/MixUncertainty/MixUncertainty")
 # Overview
 ## Catchability
 
-## metier effort-share
+## Metier effort-share
 
-## 
+## Fleet quota-share
