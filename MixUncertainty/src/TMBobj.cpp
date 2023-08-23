@@ -1,6 +1,5 @@
 #define TMB_LIB_INIT R_init_MixUncertainty
 #include <TMB.hpp>
-#include <contrib/OSA_multivariate_dists-main/distr.hpp>
 
 // find cases of missing values
 template<class Type>
@@ -22,6 +21,25 @@ vector<Type> transLogit(vector<Type> alpha){
   }
   p(dim)=lastp;
   return p;
+}
+
+// Dirichlet density function
+//
+// Trijoulet, V., Albertsen, C.M., Kristensen, K.,
+// Legault C.M., Miller T.J., Nielsen, A.,  (2023).
+// Model validation for compositional data in stock assessment models:
+// calculating residuals with correct properties Fisheries Research,
+// Volume 257: 106487 DOI: 10.1016/j.fishres.2022.106487.
+template <class Type>
+Type ddirichlet(vector<Type> x, vector<Type> alpha, int give_log=0)
+{
+  Type logB = lgamma(alpha).sum() - lgamma(alpha.sum());
+  Type logres=((alpha-Type(1))*log(x)).sum() - logB;
+  if(give_log){
+    return logres;
+  }else{
+    return exp(logres);
+  }
 }
 
 // define objective function
