@@ -105,7 +105,9 @@ $\Sigma$ is the variance-covariance matrix for the multivariate normal distribut
 
 $$\mathbf{y}\_t = \text{Dir}(\mathbf{\alpha}_t), \text{where } \mathbf{\alpha}_t = E(\mathbf{y}_t \cdot \tau)$$
 
-$\tau$ is the time-invariant concentration parameter.
+$\tau$ is the time-invariant concentration parameter. The Dirichlet density function is not built into `TMB` by default, and we use code by Trijoulet et al. (2023)[^1]. 
+
+[^1]: Trijoulet, V., Albertsen, C.M., Kristensen, K., Legault C.M., Miller T.J., Nielsen, A., (2023). Model validation for compositional data in stock assessment models: calculating residuals with correct properties Fisheries Research, Volume 257: 106487 DOI: 10.1016/j.fishres.2022.106487.
 
 One short-coming is that the Dirichlet distribution cannot accommodate zero observations. Hence, when data contain zero observations, a hurdle approach is used to model the observation process and an AR1 process is used to model the expectation. The latent AR1 process is similar to the model defined for catchability:
 
