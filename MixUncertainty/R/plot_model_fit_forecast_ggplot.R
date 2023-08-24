@@ -4,42 +4,6 @@
 # date: 'August 2023'
 # ---
 
-#' Plot latent-process model fit for a random walk and noise state-space model
-#'
-#' Plot the marginal maximum likelihood estimate for the latent process of a
-#' random walk and observation noise state-space model together with 95%
-#' confidence intervals around the estimate and observation points.
-#'
-#' @param data named list input to TMB containing observation data
-#' @param pl   named list output from TMB containing parameter estimates
-#' @param plsd named list output from TMB containing parameter standard error
-#' @param years vector of years associated with observation data
-
-plot_fit_MVN <- function(data, pl, plsd, years) {
-
-  ## compute confidence intervals
-  lower <- t(pl$rw)+2*t(plsd$rw)
-  upper <- t(pl$rw)-2*t(plsd$rw)
-
-  ## get y-range
-  ylim <- c(min(min(lower,na.rm = TRUE), min(data$dat, na.rm = TRUE)),
-            max(max(upper,na.rm = TRUE), max(data$dat, na.rm = TRUE)))
-
-  layout(matrix(c(1,2),nrow=1), width=c(4,2))
-  par(mar=c(5,4,4,0)) #No margin on the right side
-  matplot(t(data$dat), pch = 1, ylim = ylim, xlab = "year", ylab = "log-catchability",axes=F)
-  axis(2)
-  axis(side = 1, at = 1:ncol(data$dat), labels = years)
-  matplot(t(pl$rw),   type = "l", lty = 1, add = TRUE)
-  matplot(lower, type = "l", lty = 2, add = TRUE)
-  matplot(upper, type = "l", lty = 2, add = TRUE)
-  par(mar=c(5,0,4,2)) #No margin on the left side
-  plot(c(0,1), type = "n", axes = F, xlab = "", ylab = "")
-  legend("center", colnames(t(data$dat)), col = seq_len(ncol(t(data$dat))),
-         cex = 0.8, fill = seq_len(ncol(t(data$dat))))
-
-}
-
 #' Plot latent-process model fit and forecast for a random walk and noise state-space model
 #'
 #' Plot the marginal maximum likelihood estimate and median stochastic forecast
@@ -58,6 +22,13 @@ plot_fit_MVN <- function(data, pl, plsd, years) {
 #' @import ggplot2
 
 plot_forecast_MVN <- function(data, pl, plsd, pred_quantiles, years) {
+
+  ## Check that dplyr, tidyr and ggplot2 are available
+  if (!all(requireNamespace("dplyr", quietly = TRUE),
+           requireNamespace("tidyr", quietly = TRUE),
+           requireNamespace("ggplot2", quietly = TRUE))) {
+    stop("packages 'dplyr', 'tidyr' and 'ggplot2' are needed for plotting")
+  }
 
   makelong <- function(data, dref) {
     dd <- as.data.frame(t(data))
@@ -94,7 +65,7 @@ plot_forecast_MVN <- function(data, pl, plsd, pred_quantiles, years) {
   data$dat[data$dat == 0] <- NA
   d <- as.data.frame(t(log(data$dat)))
   d$years <- as.numeric(rownames(d))
-  d <- gather(d, metier, effortshare, -years)
+  d <- tidyr::gather(d, metier, effortshare, -years)
 
   colnames(lower) <- colnames(pl$rw)
   colnames(upper) <- colnames(pl$rw)
@@ -166,6 +137,13 @@ plot_forecast_MVN <- function(data, pl, plsd, pred_quantiles, years) {
 
 plot_fit_Dir <- function(data, pl, plsd, years, invlogitfun) {
 
+  ## Check that dplyr, tidyr and ggplot2 are available
+  if (!all(requireNamespace("dplyr", quietly = TRUE),
+           requireNamespace("tidyr", quietly = TRUE),
+           requireNamespace("ggplot2", quietly = TRUE))) {
+    stop("packages 'dplyr', 'tidyr' and 'ggplot2' are needed for plotting")
+  }
+
   makelong <- function(data, dref) {
     dd <- as.data.frame(t(data))
     names(dd) <- rownames(dref)
@@ -236,6 +214,13 @@ plot_fit_Dir <- function(data, pl, plsd, years, invlogitfun) {
 #' @import ggplot2
 
 plot_forecast_Dir <- function(data, pl, plsd, pred_quantiles, years, invlogitfun) {
+
+  ## Check that dplyr, tidyr and ggplot2 are available
+  if (!all(requireNamespace("dplyr", quietly = TRUE),
+           requireNamespace("tidyr", quietly = TRUE),
+           requireNamespace("ggplot2", quietly = TRUE))) {
+    stop("packages 'dplyr', 'tidyr' and 'ggplot2' are needed for plotting")
+  }
 
   makelong <- function(data, dref) {
     dd <- as.data.frame(t(data))

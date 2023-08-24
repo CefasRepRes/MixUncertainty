@@ -298,7 +298,6 @@ setMethod(f = "uncertainty_catchability",
               }, add = TRUE)
 
               out <- foreach(fleet_f = fleets,
-                             .export = c("uncertainty_catchability","TMB_logMVNrw", "MVN_option","Norm_option"),
                              .errorhandling = "pass") %dopar% {
 
                 uncertainty_catchability(fleet_f,
