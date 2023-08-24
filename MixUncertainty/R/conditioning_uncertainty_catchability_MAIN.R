@@ -313,7 +313,7 @@ setMethod(f = "uncertainty_catchability",
               }
 
 
-              fleets <- lapply(out, "[[", "fleets")
+              fleets <- FLFleets(lapply(out, "[[", "fleets"))
               logs   <- lapply(out, "[[", "logs")
               plots  <- lapply(out, "[[", "plots")
 

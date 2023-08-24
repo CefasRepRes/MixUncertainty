@@ -9,6 +9,12 @@
 #' Function configures an environment for parallel computation. This will
 #' depend on the operating system - windows and linux are supported.
 #'
+#' Structure of the function is heavily influenced by similar parallelisation
+#' helper function developed by Luca Scrucca (2013).
+#' GA: A Package for Genetic Algorithms in R.
+#' Journal of Statistical Software, 53(4), 1-37.
+#' https://doi.org/10.18637/jss.v053.i04
+#'
 #' @param parallel logical or numeric. If \code{TRUE}, the number of clusters
 #'                 will be the number of logical processors available minus 1.
 #'                 If numeric, the number of clusters will match the supplied
