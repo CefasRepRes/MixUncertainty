@@ -170,7 +170,7 @@ forecast_from_AR1_logN <- function(dat, pl, plsd, MVNcov = NULL, fillyear, nit) 
     }
 
     return(t(rwMatrix[,-1]))
-    })
+  })
 
   ## Reinsert year and stock dimension names
   dimnames(resvariates) <- list(stock = dimnames(dat)[[2]],
@@ -187,14 +187,21 @@ forecast_from_AR1_logN <- function(dat, pl, plsd, MVNcov = NULL, fillyear, nit) 
 #' @param resvariates
 #' @param metier_mt
 
-insert_forecast <- function(resvariates, qs0, qs_years, metier_mt, deterministic, detMethod, nit) {
+insert_forecast <- function(resvariates,
+                            qs0,
+                            qs_years,
+                            metier_mt,
+                            deterministic,
+                            deterministic_yrs,
+                            detMethod,
+                            nit) {
 
   ## insert into metier object
   if (deterministic) {
     for (st in dimnames(resvariates)$stock) {
       for (yr in dimnames(resvariates)$year) {
         if (detMethod == "mean") {
-          metier_mt@catches[[st]]@catch.q[,ac(yr),,,,1] <- mean(qs0[ac(tail(qs_years,3)),st],na.rm = TRUE)
+          metier_mt@catches[[st]]@catch.q[,ac(yr),,,,1] <- mean(qs0[ac(tail(qs_years, deterministic_yrs)),st],na.rm = TRUE)
         } else {
           metier_mt@catches[[st]]@catch.q[,ac(yr),,,,1] <- median(exp(resvariates[st,ac(yr),]))
         }
@@ -206,10 +213,34 @@ insert_forecast <- function(resvariates, qs0, qs_years, metier_mt, deterministic
   } else {
     for(st in dimnames(resvariates)$stock) {
       for(yr in dimnames(resvariates)$year) {
-        metier_mt@catches[[st]]@catch.q[,ac(yr)]<- exp(resvariates[st,ac(yr),])
+        metier_mt@catches[[st]]@catch.q[,ac(yr)] <- exp(resvariates[st,ac(yr),])
       }
     } # END loop over stocks
   } # END if else deterministic
 
+  return(metier_mt)
+}
+
+
+#' Insert results of a deterministic calculation into FLR
+#'
+#' In the case of model failure or insufficient data to fit a model, carry out
+#' a deterministic calculation based on the mean of the historic period
+#'
+#' @param resvariates
+#' @param metier_mt
+
+insert_deterministic <- function(qs0,
+                                 qs_years,
+                                 metier_mt,
+                                 deterministic_yrs,
+                                 nit) {
+
+  ## insert into metier object
+  for (st in colnames (qs0)) {
+    for (yr in rownames(qs0)) {
+      metier_mt@catches[[st]]@catch.q[,ac(yr),,,,1] <- mean(qs0[ac(tail(qs_years, deterministic_yrs)),st],na.rm = TRUE)
+    }
+  }
   return(metier_mt)
 }

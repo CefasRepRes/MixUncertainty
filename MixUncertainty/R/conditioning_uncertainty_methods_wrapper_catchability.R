@@ -14,11 +14,8 @@
 #' @param metier_mt description
 #' @param qs_years description
 #' @param fillyear description
-#' @param deterministic description
-#' @param detMethod description
 #' @param verbose description
 #' @param makeLog description
-#' @param makePlots description
 #'
 #' @return A list containing:
 #'
@@ -32,39 +29,36 @@ fitMVN_AR1 <- function(qs,
                        metier_mt,
                        qs_years,
                        fillyear,
-                       deterministic,
-                       detMethod,
                        verbose,
-                       makeLog,
-                       makePlots) {
-  
+                       makeLog) {
+
   ## remove rows (years) before first data point
   qs <- qs[min(which(rowSums(qs) > 0)):nrow(qs),,drop = FALSE]
-  
+
   # ---------------------------------#
   # Build data and parameter objects
   # ---------------------------------#
-  
+
   ## Prepare random walk matrix here
   rw <- t(qs)*0
-  
+
   ## convert zeros back into NA for log-transformation
   qs[qs == 0] <- NA
-  
+
   ## translate catchability to a log-scale
   logqs <- log(qs)
-  
+
   ## Check availability of catchability data
   checkout <- checkCatchability(logqs, qs_years, verbose, makeLog)
-  
+
   if(checkout$run == FALSE) {
     return(list(logs = checkout$logs))
   }
-  
+
   ## prepare objects for TMB
   data <- list (code = "A",
                 dat = t(logqs))
-  
+
   ## build parameters object
   parameters <- list(rw = rw,
                      logSdMVN = rep(0,nrow(data$dat)),
@@ -76,30 +70,30 @@ fitMVN_AR1 <- function(qs,
                      logb0  = 0,
                      logb1  = 0,
                      dat_missing = rep(0, sum(is.na(data$dat))))
-  
-  map1 <- list(logTau = as.factor(NA), 
-               logb0  = as.factor(NA), 
+
+  map1 <- list(logTau = as.factor(NA),
+               logb0  = as.factor(NA),
                logb1  = as.factor(NA))
-  
+
   # ---------------------------------#
   # Build model and optimise
   # ---------------------------------#
-  
-  obj <- tryCatch({MakeADFun(data, 
-                             parameters, 
+
+  obj <- tryCatch({MakeADFun(data,
+                             parameters,
                              random = "rw",
-                             DLL = "MixUncertainty", 
+                             DLL = "MixUncertainty",
                              map = map1,
                              silent = TRUE)},
                   error = function(e)e)
-  
+
   opt <- tryCatch({nlminb(obj$par, obj$fn, obj$gr,
                           control = list(eval.max = 1000, iter.max = 1000))},
                   error = function(e)e)
-  
+
   sdr <- tryCatch({sdreport(obj)},
                   error = function(e)e)
-  
+
   return(list(sdr = sdr,
               obj = obj,
               opt = opt))
@@ -115,11 +109,8 @@ fitMVN_AR1 <- function(qs,
 #' @param metier_mt description
 #' @param qs_years description
 #' @param fillyear description
-#' @param deterministic description
-#' @param detMethod description
 #' @param verbose description
 #' @param makeLog description
-#' @param makePlots description
 #'
 #' @return A list containing:
 #'
@@ -133,39 +124,36 @@ fit_N_AR1 <- Norm_option <- function(qs,
                                      metier_mt,
                                      qs_years,
                                      fillyear,
-                                     deterministic,
-                                     detMethod,
                                      verbose,
-                                     makeLog,
-                                     makePlots) {
-  
+                                     makeLog) {
+
   ## remove rows (years) before first data point
   qs <- qs[min(which(rowSums(qs) > 0)):nrow(qs),,drop = FALSE]
-  
+
   # ---------------------------------#
   # Build data and parameter objects
   # ---------------------------------#
-  
+
   ## Prepare random walk matrix here
   rw <- t(qs)*0
-  
+
   ## convert zeros back into NA for log-transformation
   qs[qs == 0] <- NA
-  
+
   ## translate catchability to a log-scale
   logqs <- log(qs)
-  
+
   ## Check availability of catchability data
   checkout <- checkCatchability(logqs, qs_years, verbose, makeLog)
-  
+
   if(checkout$run == FALSE) {
     return(list(logs = checkout$logs))
   }
-  
+
   ## prepare objects for TMB
   data <- list (code = "B",
                 dat = t(logqs))
-  
+
   ## build parameters object
   parameters <- list(rw = rw,
                      logSdMVN = rep(0,nrow(data$dat)),
@@ -177,31 +165,31 @@ fit_N_AR1 <- Norm_option <- function(qs,
                      logb0  = 0,
                      logb1  = 0,
                      dat_missing = rep(0, sum(is.na(data$dat))))
-  
+
   map1 <- list(logitRho = as.factor(NA),
-               logTau = as.factor(NA), 
-               logb0  = as.factor(NA), 
+               logTau = as.factor(NA),
+               logb0  = as.factor(NA),
                logb1  = as.factor(NA))
-  
+
   # ---------------------------------#
   # Build model and optimise
   # ---------------------------------#
-  
-  obj <- tryCatch({MakeADFun(data, 
-                             parameters, 
+
+  obj <- tryCatch({MakeADFun(data,
+                             parameters,
                              random = "rw",
-                             DLL = "MixUncertainty", 
+                             DLL = "MixUncertainty",
                              map = map1,
                              silent = TRUE)},
                   error = function(e)e)
-  
+
   opt <- tryCatch({nlminb(obj$par, obj$fn, obj$gr,
                           control = list(eval.max = 1000, iter.max = 1000))},
                   error = function(e)e)
-  
+
   sdr <- tryCatch({sdreport(obj)},
                   error = function(e)e)
-  
+
   return(list(sdr = sdr,
               obj = obj,
               opt = opt))

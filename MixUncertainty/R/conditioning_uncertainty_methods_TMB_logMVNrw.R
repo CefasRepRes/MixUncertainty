@@ -39,6 +39,7 @@ TMB_logMVNrw <- function(qs,
                          metier_mt,
                          fillyear,
                          deterministic,
+                         deterministic_yrs,
                          detMethod,
                          verbose = TRUE,
                          makeLog = TRUE,
@@ -81,6 +82,13 @@ TMB_logMVNrw <- function(qs,
     if (verbose) {
       cat(" no data available |")
     }
+
+    metier_mt <- insert_deterministic(qs,
+                         qs_years,
+                         metier_mt,
+                         deterministic_yrs,
+                         nit)
+
     if (makeLog) {
       logs[] <- "no data"
       return(list(res   = metier_mt,
@@ -99,19 +107,21 @@ TMB_logMVNrw <- function(qs,
   ## remove cols (stocks) with zero catchability
   qs <- qs[,colSums(qs) > 0, drop = FALSE]
 
-  # ==========================================================#
-  # Fit models
-  # ==========================================================#
+  # ============================================================================#
+  # ----------------------------------------------------------------------------#
+  # Fit models                                                                  #
+  #                                                                             #
+  # In this section, we apply a univariate normal random walk if only one stock #
+  # is caught. If more than one stock is caught, a multivariate normal random   #
+  # walk is applied to all stocks with >50% coverage of the time-series. A      #
+  # univariate normal random walk is applied to each stock with <50% coverage   #
+  # of the time-series. Stocks with < 3 data points are skipped.                #
+  # ----------------------------------------------------------------------------#
+  # ============================================================================#
 
-  # ---------------------------------------------------------#
-  # Apply appropriate analysis
-  # ---------------------------------------------------------#
-
-  # In this section, we apply a univariate normal random walk if only one stock
-  # is caught. If more than one stock is caught, a multivariate normal random
-  # walk is applied to all stocks with >50% coverage of the time-series. A
-  # univariate normal random walk is applied to each stock with <50% coverage
-  # of the time-series. Stocks with < 3 data points are skipped.
+  # ==========================================================#
+  # If 1 stock caught
+  # ==========================================================#
 
   ## univariate normal random walk if only 1 stock caught
   if (ncol(qs) < 2) {
@@ -119,11 +129,8 @@ TMB_logMVNrw <- function(qs,
                      metier_mt,
                      qs_years,
                      fillyear,
-                     deterministic,
-                     detMethod,
                      verbose,
-                     makeLog,
-                     makePlots)
+                     makeLog)
 
     ## Check if model fitted well
     if (!is.null(out$logs)) {
@@ -148,6 +155,10 @@ TMB_logMVNrw <- function(qs,
         logs <- checkOpt(out, FALSE, makeLog)
       }
     }
+
+    # ---------------------------------#
+    # If fitting success ...
+    # ---------------------------------#
 
     ## proceed with forecast if model has not failed
     if (!fail) {
@@ -192,6 +203,7 @@ TMB_logMVNrw <- function(qs,
                                      qs_years,
                                      metier_mt,
                                      deterministic,
+                                     deterministic_yrs,
                                      detMethod,
                                      nit)
 
@@ -224,9 +236,27 @@ TMB_logMVNrw <- function(qs,
         if (makeLog) {
           logs[,i] <- "Model failed"
         }
+
+        fail <- TRUE
       } # END if forecast successful
     } # END if model successful
-  }
+
+    # ---------------------------------#
+    # If fitting or forecast failure ...
+    # ---------------------------------#
+
+    if (fail) {
+      metier_mt <- insert_deterministic(qs,
+                                        qs_years,
+                                        metier_mt,
+                                        deterministic_yrs,
+                                        nit)
+    } ## END if model failed
+  } ## END if 1 stock captured
+
+  # ==========================================================#
+  # If 2 or more stocks caught
+  # ==========================================================#
 
   ## more nuanced approach if more than 1 stock caught
   if (ncol(qs) >=2) {
@@ -246,17 +276,18 @@ TMB_logMVNrw <- function(qs,
       stocks_mvn  <- vector("numeric", length = 0)
     }
 
+    # ---------------------------------#
+    # Fit multivariate normal model
+    # ---------------------------------#
+
     ## fit and forecast multivariate normal random walk
     if (length(stocks_mvn) > 0) {
       out <- fitMVN_AR1(qs[,stocks_mvn, drop = FALSE],
                         metier_mt,
                         qs_years,
                         fillyear,
-                        deterministic,
-                        detMethod,
                         verbose,
-                        makeLog,
-                        makePlots)
+                        makeLog)
 
       ## Check if model fitted well
       if (!is.null(out$logs)) {
@@ -279,20 +310,14 @@ TMB_logMVNrw <- function(qs,
         if (makeLog) {
           logs[,stocks_mvn] <- sapply(stocks_mvn, function(x) checkOpt(out, FALSE, makeLog), USE.NAMES = TRUE)
         }
-      }
+      } ## END if else model fitted well
 
-      ## If MVN model fitting fails, use univariate normal model instead
-      ## Otherwise, forecast from the model
-      if (rerun) {
+      # ---------------------------------#
+      # If fitting success ...
+      # ---------------------------------#
 
-        if (verbose)
-          cat(" RERUN |")
-
-        ## re-make stock name vector for univariate model
-        stocks_norm <- c(stocks_norm, stocks_mvn)
-        stocks_mvn  <- vector("numeric", length = 0)
-
-      } else {
+      ## If MVN model fitted well, carry out forecast
+      if (!rerun) {
 
         ## extract fitted parameters
         pl     <- as.list(out$sdr,"Est")
@@ -337,6 +362,7 @@ TMB_logMVNrw <- function(qs,
                                        qs_years,
                                        metier_mt,
                                        deterministic,
+                                       deterministic_yrs,
                                        detMethod,
                                        nit)
 
@@ -357,10 +383,10 @@ TMB_logMVNrw <- function(qs,
 
             ## Generate plot
             plots[[stocks_mvn[1]]] <- plot_forecast_MVN(list(dat = t(qs[,stocks_mvn, drop = FALSE])),
-                                                             pl,
-                                                             plsd,
-                                                             pred_quantiles,
-                                                             fillyear)
+                                                        pl,
+                                                        plsd,
+                                                        pred_quantiles,
+                                                        fillyear)
           } # END makePlots
         } else {
           if(verbose) {
@@ -369,9 +395,31 @@ TMB_logMVNrw <- function(qs,
           if (makeLog) {
             logs[,stocks_mvn] <- "Model failed"
           }
+          rerun <- TRUE
+
         } # END if else forecast success
-      } # END if else rerun
+      } # END if !rerun
+
+      # ---------------------------------#
+      # If fitting or forecast failure...
+      # ---------------------------------#
+
+      ## If MVN model fitting or forecasting fails, use univariate normal model instead
+      if (rerun) {
+
+        if (verbose)
+          cat(" RERUN |")
+
+        ## re-make stock name vector for univariate model
+        stocks_norm <- c(stocks_norm, stocks_mvn)
+        stocks_mvn  <- vector("numeric", length = 0)
+
+      }
     } # END if fit MVN stocks
+
+    # ---------------------------------#
+    # Fit Univariate normal model
+    # ---------------------------------#
 
     ## fit and forecast univariate normal random walk
     if (length(stocks_norm) > 0) {
@@ -382,11 +430,8 @@ TMB_logMVNrw <- function(qs,
                          metier_mt,
                          qs_years,
                          fillyear,
-                         deterministic,
-                         detMethod,
                          verbose,
-                         makeLog,
-                         makePlots)
+                         makeLog)
 
         ## Check if model fitted well
         if (!is.null(out$logs)) {
@@ -400,17 +445,19 @@ TMB_logMVNrw <- function(qs,
           checkout <- checkFail(out, verbose = FALSE)
           fail <- checkout$fail
 
-          if(verbose) {
-            if (fail) {
+          if(fail & verbose) {
               cat(" Model failed |")
-            }
           }
 
           ## make log
           if (makeLog) {
             logs[,i] <- checkOpt(out, FALSE, makeLog)
           }
-        }
+        } ## END check if model fitted
+
+        # ---------------------------------#
+        # If fitting success ...
+        # ---------------------------------#
 
         ## proceed with forecast if model has not failed
         if (!fail) {
@@ -462,6 +509,7 @@ TMB_logMVNrw <- function(qs,
                                          qs_years,
                                          metier_mt,
                                          deterministic,
+                                         deterministic_yrs,
                                          detMethod,
                                          nit)
 
@@ -494,8 +542,21 @@ TMB_logMVNrw <- function(qs,
             if (makeLog) {
               logs[,i] <- "Model failed"
             }
+            fail <- TRUE
           } # END if else forecast successful
         } # END if model successful
+
+        # ---------------------------------#
+        # If fitting or forecast failure ...
+        # ---------------------------------#
+
+        if (fail) {
+          metier_mt <- insert_deterministic(qs[,i, drop = FALSE],
+                                            qs_years,
+                                            metier_mt,
+                                            deterministic_yrs,
+                                            nit)
+        } # END if model fit or forecast fail
       } # END loop over stocks
     } # END if >0 valid stock
   } # END if >1 stock caught

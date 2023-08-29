@@ -16,13 +16,18 @@
 #' @param method (Character) The algorithm used to fit the statistical model and
 #'               generate stochastic forecasts. Using the default is highly
 #'               recommended.
-#' @param datayear (Integer) The final data year in the fleets object
+#' @param datayears A vector of historic years used to estimate future fleet
+#'                  effort-share
 #' @param TACyear (Integer) The projection year in the fleets object
-#' @param nyrs (Integer) The number of historic years used to estimate
-#'             future effort-share
 #' @param deterministic (Logical) Should the results for first iteration be
 #'                      a simple mean of the historical period? Defaults
 #'                      to \code{TRUE}
+#' @param deterministic_yrs (Integer) The number of recent data years to use in
+#'                          the deterministic calculation. Defaults to 3.
+#' @param detMethod (Character) The method to calculate the deterministic average.
+#'                  If "mean" then a simple mean of the most recent data years
+#'                  is used. Otherwise, the median of the stochastic forecast is
+#'                  used.
 #' @param verbose (Logical) Should the function print progress? Defaults
 #'                to \code{TRUE}
 #' @param makeLog (Logical) Should the function record model fitting and forecasting
@@ -44,10 +49,11 @@
 
 setGeneric("uncertainty_effortshare", function(fleets,
                                                method = "TMB_DirMissingAR1Hurdle",
-                                               datayear      = NULL,
+                                               datayears     = NULL,
                                                TACyear       = NULL,
-                                               nyrs          = 4,
                                                deterministic = TRUE,
+                                               deterministic_yrs = 3,
+                                               detMethod     = "mean",
                                                verbose       = TRUE,
                                                makeLog       = TRUE,
                                                makePlots     = TRUE) {
@@ -60,10 +66,11 @@ setMethod(f = "uncertainty_effortshare",
           signature = signature(fleets = "FLFleetExt"),
           definition = function(fleets,
                                 method = "TMB_DirMissingAR1Hurdle",
-                                datayear      = NULL,
+                                datayears     = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 4,
                                 deterministic = TRUE,
+                                deterministic_yrs = 3,
+                                detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
                                 makePlots     = TRUE) {
@@ -82,10 +89,11 @@ setMethod(f = "uncertainty_effortshare",
           signature = signature(fleets = "FLFleetsExt"),
           definition = function(fleets,
                                 method = "TMB_DirMissingAR1Hurdle",
-                                datayear      = NULL,
+                                datayears     = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 4,
                                 deterministic = TRUE,
+                                deterministic_yrs = 3,
+                                detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
                                 makePlots     = TRUE) {
@@ -106,10 +114,11 @@ setMethod(f = "uncertainty_effortshare",
                 cat(f)
 
               out_f <- uncertainty_effortshare(fleets[[f]],
-                                               datayear      = datayear,
+                                               datayears     = datayears,
                                                TACyear       = TACyear,
-                                               nyrs          = nyrs,
                                                deterministic = deterministic,
+                                               deterministic_yrs = deterministic_yrs,
+                                               detMethod     = detMethod,
                                                verbose       = verbose,
                                                makeLog       = makeLog,
                                                makePlots     = makePlots)
@@ -132,10 +141,11 @@ setMethod(f = "uncertainty_effortshare",
           signature = signature(fleets = "FLFleet"),
           definition = function(fleets,
                                 method = "TMB_DirMissingAR1Hurdle",
-                                datayear      = NULL,
+                                datayears     = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 4,
                                 deterministic = TRUE,
+                                deterministic_yrs = 3,
+                                detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
                                 makePlots     = TRUE) {
@@ -147,17 +157,17 @@ setMethod(f = "uncertainty_effortshare",
             if(nit < 2)
               stop("input should have > 1 iterations to store sampled uncertainty")
 
-            if(is.null(datayear))
-              stop("argument 'datayear' cannot be NULL")
+            if(is.null(datayears))
+              stop("argument 'datayears' cannot be NULL")
 
             if(is.null(TACyear))
-              TACyear <- datayear + 1
+              TACyear <- as.integer(tail(datayears,1)) + 1
 
             if(TACyear > dims(fleets)$maxyear)
               stop("argument 'TACyear' exceeds available years")
 
             ## If TACyear > datayear + 1, then fill intermediate years too
-            fillyear <- (datayear+1):TACyear
+            fillyear <- (as.integer(tail(datayears,1))+1):TACyear
 
             ## Only run if multiple metiers are present
             if (length(names(fleets@metiers)) > 1) {
@@ -168,7 +178,7 @@ setMethod(f = "uncertainty_effortshare",
 
               ## Extract metier effortshare for fleet f
               effshare_f <- sapply(fleets@metiers@names, function(mt) {
-                fleets@metiers[[mt]]@effshare[,ac((datayear-(nyrs-1)):datayear),,,,1]
+                fleets@metiers[[mt]]@effshare[,ac(datayears),,,,1]
               }, simplify = "array")[,,,,,,,drop = TRUE]
 
               # -----------------------------------------------------------------#
@@ -221,12 +231,35 @@ setMethod(f = "uncertainty_effortshare",
               resvariates <- out$res
 
               ## Insert data into correct slots
-              ## Remember! 1st iteration should be untouched for compatability
-              ## with deterministic conditioning
-              for(mt in colnames(resvariates)) {
-                fleets@metiers[[mt]]@effshare[,ac(fillyear),,,,2:nit] <- resvariates[,mt == colnames(resvariates),]
-              }
+              if (deterministic) {
 
+                ## Loop over each metier
+                for(mt in colnames(effdata)) {
+
+                  ## Fill all iterations with deterministic calculations
+                  if (detMethod == "mean") {
+                    fleets@metiers[[mt]]@effshare[,ac(fillyear)] <- mean(effdata[tail(1:nrow(effdata), deterministic_yrs),mt],na.rm = TRUE)
+                  } else {
+                    fleets@metiers[[mt]]@effshare[,ac(fillyear)] <- apply(exp(resvariates[,mt,]), 1, median, na.rm = TRUE)
+                  }
+
+                  ## Overwrite 2+ iterations with stochastically sampled values
+                  fleets@metiers[[mt]]@effshare[,ac(fillyear),,,,2:nit] <- resvariates[,mt == colnames(resvariates),]
+                }
+
+              } else {
+
+                ## Fill all iterations with deterministic calculations
+                ## (insurance against failed model forecasts)
+                if (detMethod == "mean") {
+                  fleets@metiers[[mt]]@effshare[,ac(fillyear)] <- mean(effdata[tail(1:nrow(effdata), deterministic_yrs),mt],na.rm = TRUE)
+                }
+
+                ## Overwrite all iterations with stochastically sampled values
+                for(mt in colnames(resvariates)) {
+                  fleets@metiers[[mt]]@effshare[,ac(fillyear)] <- resvariates[,mt == colnames(resvariates),]
+                }
+              }
             } else { ### If only 1 metier
 
               fleets@metiers[[1]]@effshare[,ac(fillyear)] <- 1
@@ -256,10 +289,11 @@ setMethod(f = "uncertainty_effortshare",
           signature = signature(fleets = "FLFleets"),
           definition = function(fleets,
                                 method = "TMB_DirMissingAR1Hurdle",
-                                datayear      = NULL,
+                                datayears     = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 4,
                                 deterministic = TRUE,
+                                deterministic_yrs = 3,
+                                detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
                                 makePlots     = TRUE) {
@@ -271,12 +305,12 @@ setMethod(f = "uncertainty_effortshare",
             if(nit < 2)
               stop("input should have > 1 iterations to store sampled uncertainty")
 
-            if(is.null(datayear))
-              stop("argument 'datayear' cannot be NULL")
+            if(is.null(datayears))
+              stop("argument 'datayears' cannot be NULL")
 
             ## Define TAC year if not provided
             if(is.null(TACyear))
-              TACyear <- datayear + 1
+              TACyear <- as.integer(tail(datayears,1)) + 1
 
             if(TACyear > dims(fleets)$maxyear)
               stop("argument 'TACyear' exceeds available years")
@@ -299,10 +333,11 @@ setMethod(f = "uncertainty_effortshare",
 
               out_f <- uncertainty_effortshare(fleets[[f]],
                                                method = method,
-                                               datayear      = datayear,
+                                               datayears     = datayears,
                                                TACyear       = TACyear,
-                                               nyrs          = nyrs,
                                                deterministic = deterministic,
+                                               deterministic_yrs = deterministic_yrs,
+                                               detMethod     = detMethod,
                                                verbose       = verbose,
                                                makeLog       = makeLog,
                                                makePlots     = makePlots)

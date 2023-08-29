@@ -18,10 +18,9 @@
 #'               recommended.
 #' @param quotashare (Optional) A data frame containing: year, stock, fleet
 #'                   and landingshare.
-#' @param datayear (Integer) The final data year in the fleets object
+#' @param datayears A vector of historic years used to estimate future stock
+#'                  quota-share
 #' @param TACyear (Integer) The projection year in the fleets object
-#' @param nyrs (Integer) The number of historic years used to estimate
-#'             future fleet quota-share
 #' @param deterministic (Logical) Should the results for first iteration be
 #'                      a simple mean of the historical period? Defaults
 #'                      to \code{TRUE}
@@ -42,9 +41,8 @@
 setGeneric("uncertainty_quotashare", function(fleets,
                                               method = "TMB_DirMissingAR1Hurdle",
                                               quotashare    = NULL,
-                                              datayear      = NULL,
+                                              datayears     = NULL,
                                               TACyear       = NULL,
-                                              nyrs          = 4,
                                               deterministic = TRUE,
                                               deterministic_yrs = 3,
                                               verbose       = TRUE,
@@ -60,9 +58,8 @@ setMethod(f = "uncertainty_quotashare",
           definition = function(fleets,
                                 method = "TMB_DirMissingAR1Hurdle",
                                 quotashare    = NULL,
-                                datayear      = NULL,
+                                datayears     = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 4,
                                 deterministic = TRUE,
                                 deterministic_yrs = 3,
                                 verbose       = TRUE,
@@ -80,9 +77,8 @@ setMethod(f = "uncertainty_quotashare",
           definition = function(fleets,
                                 method = "TMB_DirMissingAR1Hurdle",
                                 quotashare    = NULL,
-                                datayear      = NULL,
+                                datayears     = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 4,
                                 deterministic = TRUE,
                                 deterministic_yrs = 3,
                                 verbose       = TRUE,
@@ -97,24 +93,24 @@ setMethod(f = "uncertainty_quotashare",
             if(nit < 2)
               stop("input should have > 1 iterations to store sampled uncertainty")
 
-            if(is.null(datayear))
-              stop("argument 'datayear' cannot be NULL")
+            if(is.null(datayears))
+              stop("argument 'datayears' cannot be NULL")
 
             if(is.null(TACyear))
-              TACyear <- datayear + 1
+              TACyear <- as.integer(tail(datayears,1)) + 1
 
             if(TACyear > dims(fleets)$maxyear)
               stop("argument 'TACyear' exceeds available years")
 
             ## If TACyear > datayear + 1, then fill intermediate years too
-            fillyear <- (datayear+1):TACyear
+            fillyear <- (as.integer(tail(datayears,1))+1):TACyear
 
             # ----------------------------#
             # Extract Fleet Landings-share
             # ----------------------------#
 
             if (is.null(quotashare)) {
-              fleetcatches <- calculate_landingshare(fleets, datayear, nyrs)
+              fleetcatches <- calculate_landingshare(fleets, datayears)
             } else {
               fleetcatches <- quotashare
             }
@@ -164,7 +160,7 @@ setMethod(f = "uncertainty_quotashare",
                                                  sep='')))
 
             ## filter for data years
-            fleets_land <- fleets_land[fleets_land$year %in% ((datayear-deterministic_yrs+1):datayear),]
+            fleets_land <- fleets_land[fleets_land$year %in% (tail(datayears, deterministic_yrs),]
             quotashare  <-  tapply(fleets_land$landings,
                                  list(fleets_land$qname,
                                       fleets_land$fleet,
@@ -274,12 +270,11 @@ setMethod(f = "uncertainty_quotashare",
 #' iteration of each landings \code{FLQuant}.
 #'
 #' @param fleets An \code{FLFleets} object
-#' @param datayear The final year of data in the \code{FLFleets} object
-#' @param nyrs The number of recent data years to include in calculations
+#' @param datayears A vector of historic data years to include in calculations
 #'
 #' @return A data frame with variables: 'year', 'stock', 'fleet' and 'landingshare'
 
-calculate_landingshare <- function(fleets, datayear, nyrs) {
+calculate_landingshare <- function(fleets, datayears) {
 
   # ------------------------------#
   # Calculate fleet stock landings
@@ -331,7 +326,7 @@ calculate_landingshare <- function(fleets, datayear, nyrs) {
   fleetcatches$landingshare <- fleetcatches$data.x/fleetcatches$data.y
 
   ## select recent years
-  fleetcatches <- fleetcatches[fleetcatches$year %in% ac((datayear-(nyrs-1)):datayear),]
+  fleetcatches <- fleetcatches[fleetcatches$year %in% ac(datayears),]
 
   ## remove unnecessary columns
   fleetcatches <- fleetcatches[,!(colnames(fleetcatches) %in% c("data.x", "data.y"))]

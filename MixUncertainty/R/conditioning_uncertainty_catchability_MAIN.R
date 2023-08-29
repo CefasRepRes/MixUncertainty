@@ -16,16 +16,16 @@
 #' @param method (Character) The algorithm used to fit the statistical model and
 #'               generate stochastic forecasts. Using the default is highly
 #'               recommended.
-#' @param datayear (Integer) The final data year in the fleets object
+#' @param datayears A vector of historic years used to estimate future fleet
+#'                  catchability
 #' @param TACyear (Integer) The projection year in the fleets object
-#' @param nyrs (Integer) The number of historic years used to estimate
-#'             future catchability. Defaults to 3. Recommend > 10 if
-#'             using a random walk model.
 #' @param deterministic (Logical) Should the results for first iteration be
 #'                      a deterministic average of the historical period? Defaults
 #'                      to \code{TRUE}
+#' @param deterministic_yrs (Integer) The number of recent data years to use in
+#'                          the deterministic calculation. Defaults to 3.
 #' @param detMethod (Character) The method to calculate the deterministic average.
-#'                  If "mean" then a simple mean of the most recent three data years
+#'                  If "mean" then a simple mean of the most recent data years
 #'                  is used. Otherwise, the median of the stochastic forecast is
 #'                  used.
 #' @param verbose (Logical) Should the function print progress? Defaults
@@ -42,10 +42,10 @@
 
 setGeneric("uncertainty_catchability", function(fleets,
                                                 method        = "TMB_logMVNrw",
-                                                datayear      = NULL,
+                                                datayears     = NULL,
                                                 TACyear       = NULL,
-                                                nyrs          = 3,
                                                 deterministic = TRUE,
+                                                deterministic_yrs = 3,
                                                 detMethod     = "mean",
                                                 verbose       = TRUE,
                                                 makeLog       = TRUE,
@@ -70,10 +70,10 @@ setMethod(f = "uncertainty_catchability",
           signature = signature(fleets = "FLFleetExt"),
           definition = function(fleets,
                                 method        = "TMB_logMVNrw",
-                                datayear      = NULL,
+                                datayears      = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 3,
                                 deterministic = TRUE,
+                                deterministic_yrs = 3,
                                 detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
@@ -92,10 +92,10 @@ setMethod(f = "uncertainty_catchability",
           signature = signature(fleets = "FLFleetsExt"),
           definition = function(fleets,
                                 method        = "TMB_logMVNrw",
-                                datayear      = NULL,
+                                datayears     = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 3,
                                 deterministic = TRUE,
+                                deterministic_yrs = 3,
                                 detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
@@ -124,10 +124,10 @@ setMethod(f = "uncertainty_catchability",
 
                 out_f <- uncertainty_catchability(fleets[[f]],
                                                   method        = method,
-                                                  datayear      = datayear,
+                                                  datayears     = datayears,
                                                   TACyear       = TACyear,
-                                                  nyrs          = nyrs,
                                                   deterministic = deterministic,
+                                                  deterministic_yrs = deterministic_yrs,
                                                   detMethod     = detMethod,
                                                   verbose       = verbose,
                                                   makeLog       = makeLog,
@@ -150,10 +150,10 @@ setMethod(f = "uncertainty_catchability",
           signature = signature(fleets = "FLFleet"),
           definition = function(fleets,
                                 method        = "TMB_logMVNrw",
-                                datayear      = NULL,
+                                datayears     = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 3,
                                 deterministic = TRUE,
+                                deterministic_yrs = 3,
                                 detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
@@ -166,11 +166,11 @@ setMethod(f = "uncertainty_catchability",
             if(nit < 2)
               stop("input should have > 1 iterations to store sampled uncertainty")
 
-            if(is.null(datayear))
-              stop("argument 'datayear' cannot be NULL")
+            if(is.null(datayears))
+              stop("argument 'datayears' cannot be NULL")
 
             if(is.null(TACyear))
-              TACyear <- datayear + 1
+              TACyear <- as.integer(tail(datayear,1)) + 1
 
             if(TACyear > dims(fleets)$maxyear)
               stop("argument 'TACyear' exceeds available years")
@@ -187,7 +187,7 @@ setMethod(f = "uncertainty_catchability",
             }
 
             ## If TACyear > datayear + 1, then fill intermediate years too
-            fillyear <- (datayear+1):TACyear
+            fillyear <- (as.integer(tail(datayear,1))+1):TACyear
 
             ## loop over metiers
             for(mt in fleets@metiers@names) {
@@ -201,9 +201,7 @@ setMethod(f = "uncertainty_catchability",
               years <- dimnames(metier_mt@catches[[1]])$year
 
               ## Define conditioned year
-              if(!is.null(nyrs))
-                catchabilityyears <- which(sapply(years, function(x) x %in%
-                                                    ((datayear-(nyrs-1)):datayear)))
+              catchabilityyears <- which(sapply(years, function(x) x %in% datayears))
 
               ## extract catchability for recent years
               qs <- sapply(names(metier_mt@catches),
@@ -218,14 +216,14 @@ setMethod(f = "uncertainty_catchability",
               }
 
               ## extract recent historical period to condition catchability from
-              if(!is.null(nyrs))
-                qs <- qs[catchabilityyears,, drop=FALSE]  ## conditioned years
+              qs <- qs[catchabilityyears,, drop=FALSE]  ## conditioned years
 
               ## Apply method to fit a distribution to historic catchability and generate a forecast
               out_mt <- do.call(method, list(qs,
                                              metier_mt,
                                              fillyear,
                                              deterministic,
+                                             deterministic_yrs,
                                              detMethod,
                                              verbose,
                                              makeLog,
@@ -250,10 +248,10 @@ setMethod(f = "uncertainty_catchability",
           signature = signature(fleets = "FLFleets"),
           definition = function(fleets,
                                 method        = "TMB_logMVNrw",
-                                datayear      = NULL,
+                                datayears     = NULL,
                                 TACyear       = NULL,
-                                nyrs          = 3,
                                 deterministic = TRUE,
+                                deterministic_yrs = 3,
                                 detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
@@ -302,10 +300,10 @@ setMethod(f = "uncertainty_catchability",
 
                 uncertainty_catchability(fleet_f,
                                          method        = method,
-                                         datayear      = datayear,
+                                         datayears     = datayears,
                                          TACyear       = TACyear,
-                                         nyrs          = nyrs,
                                          deterministic = deterministic,
+                                         deterministic_yrs = deterministic_yrs,
                                          detMethod     = detMethod,
                                          verbose       = verbose,
                                          makeLog       = makeLog,
@@ -327,10 +325,10 @@ setMethod(f = "uncertainty_catchability",
 
                 out_f <- uncertainty_catchability(fleets[[f]],
                                                   method        = method,
-                                                  datayear      = datayear,
+                                                  datayears     = datayears,
                                                   TACyear       = TACyear,
-                                                  nyrs          = nyrs,
                                                   deterministic = deterministic,
+                                                  deterministic_yrs = deterministic_yrs,
                                                   detMethod     = detMethod,
                                                   verbose       = verbose,
                                                   makeLog       = makeLog,

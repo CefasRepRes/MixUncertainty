@@ -15,12 +15,14 @@
 #'
 #' @param dat A matrix of historic effortshare where rows = years and cols = metiers
 #' @param nit (Integer) the number of replicate parameter trajectories to sample
-#' @param fillyear
-#' @param vebose
-#' @param makeLog
-#' @param makePlots
+#' @param fillyear Vector of intermediate and forecast years to be sampled for.
+#' @param verbose (Logical) Should the function print progress?
+#' @param makeLog (Logical) Should the function generate a log of the methods
+#'                applied to each variable (and their success)?
+#' @param makePlots (Logical) Should the function generate plots showing model
+#'                  fit to data for each stock?
 #'
-#' @return An matrix of sampled parameters
+#' @return An matrix of sampled parameter values
 #'
 #' @export
 
