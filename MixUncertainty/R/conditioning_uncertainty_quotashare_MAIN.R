@@ -219,6 +219,10 @@ setMethod(f = "uncertainty_quotashare",
                 # Fit Dirichlet model
                 # ---------------------------#
 
+                ## use datayears as rownames
+                rownames(landsharedata) <- datayears
+
+                ## fit model
                 out <- do.call(method, list(dat      = as.matrix(landsharedata),
                                             nit      = ifelse(deterministic, nit-1, nit),
                                             fillyear = fillyear,

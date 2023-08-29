@@ -172,6 +172,9 @@ setMethod(f = "uncertainty_catchability",
             if(is.null(TACyear))
               TACyear <- as.integer(tail(datayears,1)) + 1
 
+            if(TACyear < as.integer(tail(datayears,1)))
+              stop("argument 'TACyear' cannot be in 'datayears'")
+
             if(TACyear > dims(fleets)$maxyear)
               stop("argument 'TACyear' exceeds available years")
 
