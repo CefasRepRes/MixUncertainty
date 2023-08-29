@@ -160,7 +160,7 @@ setMethod(f = "uncertainty_quotashare",
                                                  sep='')))
 
             ## filter for data years
-            fleets_land <- fleets_land[fleets_land$year %in% (tail(datayears, deterministic_yrs),]
+            fleets_land <- fleets_land[fleets_land$year %in% tail(datayears, deterministic_yrs),]
             quotashare  <-  tapply(fleets_land$landings,
                                  list(fleets_land$qname,
                                       fleets_land$fleet,
