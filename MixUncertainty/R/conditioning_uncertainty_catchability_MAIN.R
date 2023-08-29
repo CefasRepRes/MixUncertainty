@@ -170,7 +170,7 @@ setMethod(f = "uncertainty_catchability",
               stop("argument 'datayears' cannot be NULL")
 
             if(is.null(TACyear))
-              TACyear <- as.integer(tail(datayear,1)) + 1
+              TACyear <- as.integer(tail(datayears,1)) + 1
 
             if(TACyear > dims(fleets)$maxyear)
               stop("argument 'TACyear' exceeds available years")
@@ -187,7 +187,7 @@ setMethod(f = "uncertainty_catchability",
             }
 
             ## If TACyear > datayear + 1, then fill intermediate years too
-            fillyear <- (as.integer(tail(datayear,1))+1):TACyear
+            fillyear <- (as.integer(tail(datayears,1))+1):TACyear
 
             ## loop over metiers
             for(mt in fleets@metiers@names) {
