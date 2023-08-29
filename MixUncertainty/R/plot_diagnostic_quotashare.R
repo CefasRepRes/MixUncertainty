@@ -89,7 +89,7 @@ setMethod(f = "diagnostic_quotashare",
               geom_ribbon(aes(x = year, ymin = p05, ymax = p95), alpha = 0.10) +
               geom_point(aes(x = year, y = quotashare),
                          data = quotashare[quotashare$iter == 1,]) +
-              geom_vline(aes(xintercept = as.integer(tail(datayear,1))), linetype = 2) +
+              geom_vline(aes(xintercept = as.integer(tail(datayears,1))), linetype = 2) +
               scale_y_continuous("Fleet landings-share") +
               facet_wrap(~fleet, scales = "free_y") +
               ggtitle(stk) +

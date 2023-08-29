@@ -45,7 +45,7 @@ setMethod(f = "diagnostic_effortshare",
 
             ## Extract metier effortshare for fleet f
             effshare_f <- sapply(fleets@metiers@names, function(mt) {
-              fleets@metiers[[mt]]@effshare[,ac(datayears)]
+              fleets@metiers[[mt]]@effshare[,ac(head(as.integer(datayears),1):TACyear)]
             }, simplify = "array")[,,,,,,,drop = TRUE]
 
             ## Convert into dataframe
