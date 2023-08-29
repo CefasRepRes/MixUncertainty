@@ -5,10 +5,9 @@
 # ---
 
 setGeneric("diagnostic_effortshare", function(fleets,
-                                              nyrs     = 4,
-                                              datayear = NULL,
-                                              TACyear  = NULL,
-                                              fl       = NULL) {
+                                              datayears = NULL,
+                                              TACyear   = NULL,
+                                              fl        = NULL) {
   standardGeneric("diagnostic_effortshare")
 })
 
@@ -17,9 +16,8 @@ setGeneric("diagnostic_effortshare", function(fleets,
 setMethod(f = "diagnostic_effortshare",
           signature = signature(fleets = "FLFleetExt"),
           definition = function(fleets,
-                                nyrs     = 4,
-                                datayear = NULL,
-                                TACyear  = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL) {
 
           })
 
@@ -29,10 +27,9 @@ setMethod(f = "diagnostic_effortshare",
 setMethod(f = "diagnostic_effortshare",
           signature = signature(fleets = "FLFleetsExt"),
           definition = function(fleets,
-                                nyrs     = 4,
-                                datayear = NULL,
-                                TACyear  = NULL,
-                                fl       = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL,
+                                fl        = NULL) {
 
           })
 
@@ -41,15 +38,14 @@ setMethod(f = "diagnostic_effortshare",
 setMethod(f = "diagnostic_effortshare",
           signature = signature(fleets = "FLFleet"),
           definition = function(fleets,
-                                nyrs     = 4,
-                                datayear = NULL,
-                                TACyear  = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL) {
 
             require(dplyr)
 
             ## Extract metier effortshare for fleet f
             effshare_f <- sapply(fleets@metiers@names, function(mt) {
-              fleets@metiers[[mt]]@effshare[,ac((datayear-(nyrs-1)):TACyear)]
+              fleets@metiers[[mt]]@effshare[,ac(datayears)]
             }, simplify = "array")[,,,,,,,drop = TRUE]
 
             ## Convert into dataframe
@@ -75,7 +71,7 @@ setMethod(f = "diagnostic_effortshare",
 
                                                          }),
                                            metier = fleets@metiers@names, year = TACyear)) +
-              geom_vline(aes(xintercept = datayear), linetype = 2) +
+              geom_vline(aes(xintercept = as.integer(tail(datayears,1))), linetype = 2) +
               scale_y_continuous("Metier effort-share") +
               facet_wrap(~metier, scales = "free_y") +
               ggtitle(fleets@name) +
@@ -88,10 +84,9 @@ setMethod(f = "diagnostic_effortshare",
 setMethod(f = "diagnostic_effortshare",
           signature = signature(fleets = "FLFleets"),
           definition = function(fleets,
-                                nyrs     = 4,
-                                datayear = NULL,
-                                TACyear  = NULL,
-                                fl       = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL,
+                                fl        = NULL) {
 
             if (is.null(fl))
               stop("Fleet name 'fl' must be specified")
@@ -103,9 +98,8 @@ setMethod(f = "diagnostic_effortshare",
             fleets_fl <- fleets[[fl]]
 
             ## run plotting function
-            diagnostic_effortshare(fleets   = fleets_fl,
-                                   nyrs     = nyrs,
-                                   datayear = datayear,
-                                   TACyear  = TACyear)
+            diagnostic_effortshare(fleets    = fleets_fl,
+                                   datayears = datayears,
+                                   TACyear   = TACyear)
 
           })

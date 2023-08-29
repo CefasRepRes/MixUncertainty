@@ -5,13 +5,12 @@
 # ---
 
 setGeneric("diagnostic_catchability", function(fleets,
-                                               nyrs     = 3,
-                                               datayear = NULL,
-                                               TACyear  = NULL,
-                                               fl       = NULL,
-                                               mt       = NULL,
-                                               c1       = NULL,
-                                               c2       = NULL) {
+                                               datayears = NULL,
+                                               TACyear   = NULL,
+                                               fl        = NULL,
+                                               mt        = NULL,
+                                               c1        = NULL,
+                                               c2        = NULL) {
   standardGeneric("diagnostic_catchability")
 })
 
@@ -20,12 +19,11 @@ setGeneric("diagnostic_catchability", function(fleets,
 setMethod(f = "diagnostic_catchability",
           signature = signature(fleets = "FLFleetExt"),
           definition = function(fleets,
-                                nyrs     = 3,
-                                datayear = NULL,
-                                TACyear  = NULL,
-                                mt       = NULL,
-                                c1       = NULL,
-                                c2       = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL,
+                                mt        = NULL,
+                                c1        = NULL,
+                                c2        = NULL) {
 
           })
 
@@ -35,13 +33,12 @@ setMethod(f = "diagnostic_catchability",
 setMethod(f = "diagnostic_catchability",
           signature = signature(fleets = "FLFleetsExt"),
           definition = function(fleets,
-                                nyrs     = 3,
-                                datayear = NULL,
-                                TACyear  = NULL,
-                                fl   = NULL,
-                                mt   = NULL,
-                                c1   = NULL,
-                                c2   = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL,
+                                fl        = NULL,
+                                mt        = NULL,
+                                c1        = NULL,
+                                c2        = NULL) {
 
           })
 
@@ -50,18 +47,17 @@ setMethod(f = "diagnostic_catchability",
 setMethod(f = "diagnostic_catchability",
           signature = signature(fleets = "FLFleet"),
           definition = function(fleets,
-                                nyrs     = 3,
-                                datayear = NULL,
-                                TACyear  = NULL,
-                                mt       = NULL,
-                                c1       = NULL,
-                                c2       = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL,
+                                mt        = NULL,
+                                c1        = NULL,
+                                c2        = NULL) {
 
             ## Extract vector of data years
             years <- dimnames(fleets@metiers[[mt]]@catches[[1]])$year
 
             ## Define conditioned year
-            catchabilityyears <- which(sapply(years, function(x) x %in% ((datayear-(nyrs-1)):datayear)))
+            catchabilityyears <- which(sapply(years, function(x) x %in% datayears))
 
             ## extract sampled catchability
             plot_df <- data.frame(c1 = c(fleets@metiers[[mt]]@catches[[c1]]@catch.q[,ac(TACyear)]),
@@ -113,13 +109,12 @@ setMethod(f = "diagnostic_catchability",
 setMethod(f = "diagnostic_catchability",
           signature = signature(fleets = "FLFleets"),
           definition = function(fleets,
-                                nyrs     = 3,
-                                datayear = NULL,
-                                TACyear  = NULL,
-                                fl   = NULL,
-                                mt   = NULL,
-                                c1   = NULL,
-                                c2   = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL,
+                                fl        = NULL,
+                                mt        = NULL,
+                                c1        = NULL,
+                                c2        = NULL) {
 
             if (is.null(fl))
               stop("Fleet name 'fl' must be specified")
@@ -135,9 +130,8 @@ setMethod(f = "diagnostic_catchability",
 
             ## run plotting function
             diagnostic_catchability(fleets = fleets_fl,
-                                    datayear = datayear,
-                                    TACyear = TACyear,
-                                    nyrs = nyrs,
+                                    datayears = datayears,
+                                    TACyear   = TACyear,
                                     mt = mt,
                                     c1 = c1,
                                     c2 = c2)

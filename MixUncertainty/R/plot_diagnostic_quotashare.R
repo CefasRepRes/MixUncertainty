@@ -6,10 +6,9 @@
 
 setGeneric("diagnostic_quotashare", function(fleets,
                                              quotashare,
-                                             nyrs     = 4,
-                                             datayear = NULL,
-                                             TACyear  = NULL,
-                                             stk      = NULL) {
+                                             datayears = NULL,
+                                             TACyear   = NULL,
+                                             stk       = NULL) {
   standardGeneric("diagnostic_quotashare")
 })
 
@@ -19,10 +18,9 @@ setMethod(f = "diagnostic_quotashare",
           signature = signature(fleets = "FLFleetsExt"),
           definition = function(fleets,
                                 quotashare,
-                                nyrs     = 4,
-                                datayear = NULL,
-                                TACyear  = NULL,
-                                stk      = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL,
+                                stk       = NULL) {
 
           })
 
@@ -32,10 +30,9 @@ setMethod(f = "diagnostic_quotashare",
           signature = signature(fleets = "FLFleets"),
           definition = function(fleets,
                                 quotashare,
-                                nyrs     = 4,
-                                datayear = NULL,
-                                TACyear  = NULL,
-                                stk      = NULL) {
+                                datayears = NULL,
+                                TACyear   = NULL,
+                                stk       = NULL) {
 
             if (is.null(stk))
               stop("'stk' must be specified")
@@ -60,9 +57,7 @@ setMethod(f = "diagnostic_quotashare",
             # Extract Fleet Landings-share
             # ----------------------------#
 
-            fleetcatches <- calculate_landingshare(fleets = fleets,
-                                                   datayear = datayear,
-                                                   nyrs = nyrs)
+            fleetcatches <- calculate_landingshare(fleets = fleets, datayears = datayears)
 
             ## reformat fleetcatches to match quotashare
             fleetcatches$iter <- 1
@@ -94,7 +89,7 @@ setMethod(f = "diagnostic_quotashare",
               geom_ribbon(aes(x = year, ymin = p05, ymax = p95), alpha = 0.10) +
               geom_point(aes(x = year, y = quotashare),
                          data = quotashare[quotashare$iter == 1,]) +
-              geom_vline(aes(xintercept = datayear), linetype = 2) +
+              geom_vline(aes(xintercept = as.integer(tail(datayear,1))), linetype = 2) +
               scale_y_continuous("Fleet landings-share") +
               facet_wrap(~fleet, scales = "free_y") +
               ggtitle(stk) +
