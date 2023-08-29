@@ -239,7 +239,8 @@ insert_deterministic <- function(qs0,
   ## insert into metier object
   for (st in colnames (qs0)) {
     for (yr in rownames(qs0)) {
-      metier_mt@catches[[st]]@catch.q[,ac(yr),,,,1] <- mean(qs0[ac(tail(qs_years, deterministic_yrs)),st],na.rm = TRUE)
+      tailyrs <- rownames(qs0) %in% ac(tail(qs_years, deterministic_yrs))
+      metier_mt@catches[[st]]@catch.q[,ac(yr),,,,1] <- mean(qs0[tailyrs, st], na.rm = TRUE)
     }
   }
   return(metier_mt)
