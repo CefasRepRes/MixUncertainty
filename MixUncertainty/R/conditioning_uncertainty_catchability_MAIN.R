@@ -265,11 +265,11 @@ setMethod(f = "uncertainty_catchability",
             if(nit < 2)
               stop("input should have > 1 iterations to store sampled uncertainty")
 
-            if(is.null(datayear))
-              stop("argument 'datayear' cannot be NULL")
+            if(is.null(datayears))
+              stop("argument 'datayears' cannot be NULL")
 
             if(is.null(TACyear))
-              TACyear <- datayear + 1
+              TACyear <- as.integer(tail(datayears,1)) + 1
 
             if(TACyear > dims(fleets)$maxyear)
               stop("argument 'TACyear' exceeds available years")
