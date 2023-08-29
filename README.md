@@ -30,10 +30,10 @@ dim(example_fleets)
 ```
 
 ### Catchability
-Fit simple state-space time-series model to 10 years of historic observations. Specify that year 10 is the final data year and forecasts should extend to year 12.
+Fit simple state-space time-series model to 10 years of historic observations. Specify the data years and forecasts should extend to year 2022.
 
 ``` {r}
-out1 <- uncertainty_catchability(example_fleets, datayear = 10, TACyear = 12, nyrs = 10)
+out1 <- uncertainty_catchability(example_fleets, datayear = 2011:2020, TACyear = 2022)
 
 ## check model fitting logs for each catch
 out1$logs
@@ -43,14 +43,14 @@ out1$plots
 
 ## generate figure showing covariance in observations and random draws for two stocks
 ## harvested by a given metier
-diagnostic_catchability(out1$fleets, nyrs = 10, datayear = 10, TACyear = 12,
+diagnostic_catchability(out1$fleets, datayear = 2011:2020, TACyear = 2022,
                         fl = "I", mt = "1ab", c1 = "A", c2 =  "B")
 ```
 ### Metier effort-share
 To combine uncertainty around catchability and effort-share conditioning, use the updated fleet object as input.
 
 ```{r}
-out2 <- uncertainty_effortshare(out1$fleets, datayear = 10, TACyear = 12, nyrs = 10)
+out2 <- uncertainty_effortshare(out1$fleets, datayear = 2011:2020, TACyear = 2022)
 
 ## check model fitting logs for each fleet
 out2$logs
@@ -59,13 +59,13 @@ out2$logs
 out2$plots
 
 ## generate figure showing times-series of historic data and stochastic forecast
-diagnostic_effortshare(out2$fleets$I, nyrs = 10, datayear = 10, TACyear = 12)
+diagnostic_effortshare(out2$fleets$I, datayear = 2011:2020, TACyear = 2022)
 ```
 ### Fleet quota-share
 The historic proportional share of stock quota allocated to each fleet is not typically known and mixed fisheries models typically use the share of stock landings as a proxy for quota-share. If quota-share is `NULL`, a time-series model is fitted to the historic proportional share of stock landings.
 
 ```{r}
-out3 <- uncertainty_quotashare(out2$fleets, quotashare = NULL, datayear = 10, TACyear = 12, nyrs = 10)
+out3 <- uncertainty_quotashare(out2$fleets, quotashare = NULL, datayear = 2011:2020)
 
 ## a three-dimensional array (stock, fleet, iteration)
 dim(out3$quotashare)
@@ -78,7 +78,7 @@ out3$plots
 
 ## generate figure showing times-series of historic data and stochastic forecast
 diagnostic_quotashare(fleets = out2$fleets, quotashare = out3$quotashare, stk = "B",
-                      nyrs = 10, datayear = 10, TACyear = 12)
+                      datayear = 2011:2020)
 
 ```
 
