@@ -77,28 +77,27 @@ TMB_logMVNrw <- function(qs,
   qs[is.na(qs)|is.nan(qs)] <- 0
   qs[is.infinite(qs)]      <- 0
 
+  ## As an initial step, insert a deterministic calculation to handle cases
+  ## where model fitting or forecast fails
+  metier_mt <- insert_deterministic(qs,
+                                    qs_years,
+                                    metier_mt,
+                                    deterministic_yrs,
+                                    nit)
+
   ## exit function if all data are zero
   if (all(qs == 0)) {
     if (verbose) {
       cat(" no data available |")
     }
-
-    metier_mt <- insert_deterministic(qs,
-                         qs_years,
-                         metier_mt,
-                         deterministic_yrs,
-                         nit)
-
     if (makeLog) {
       logs[] <- "no data"
-      return(list(res   = metier_mt,
-                  logs  = logs,
-                  plots = NULL))
     } else {
-      return(list(res   = metier_mt,
-                  logs  = NULL,
-                  plots = NULL))
+      logs <- NULL
     }
+    return(list(res   = metier_mt,
+                logs  = logs,
+                plots = NULL))
   }
 
   ## remove rows (years) before first data point
@@ -239,19 +238,7 @@ TMB_logMVNrw <- function(qs,
 
         fail <- TRUE
       } # END if forecast successful
-    } # END if model successful
-
-    # ---------------------------------#
-    # If fitting or forecast failure ...
-    # ---------------------------------#
-
-    if (fail) {
-      metier_mt <- insert_deterministic(qs,
-                                        qs_years,
-                                        metier_mt,
-                                        deterministic_yrs,
-                                        nit)
-    } ## END if model failed
+    } # END if model fit successful
   } ## END if 1 stock captured
 
   # ==========================================================#
@@ -544,19 +531,7 @@ TMB_logMVNrw <- function(qs,
             }
             fail <- TRUE
           } # END if else forecast successful
-        } # END if model successful
-
-        # ---------------------------------#
-        # If fitting or forecast failure ...
-        # ---------------------------------#
-
-        if (fail) {
-          metier_mt <- insert_deterministic(qs[,i, drop = FALSE],
-                                            qs_years,
-                                            metier_mt,
-                                            deterministic_yrs,
-                                            nit)
-        } # END if model fit or forecast fail
+        } # END if model fit successful
       } # END loop over stocks
     } # END if >0 valid stock
   } # END if >1 stock caught
