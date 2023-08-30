@@ -230,6 +230,27 @@ setMethod(f = "uncertainty_effortshare",
 
               resvariates <- out$res
 
+              # ----------------------------------#
+              # Initial deterministic calculation
+              # ----------------------------------#
+              #
+              # To handle the possibility of a failed forecast, we first fill
+              # all slots with a simple mean of historic years.
+
+              for (mt in colnames(effdata)) {
+                fleets@metiers[[mt]]@effshare[,ac(fillyear)] <- mean(effdata[tail(1:nrow(effdata), deterministic_yrs),mt],na.rm = TRUE)
+              }
+
+              if (is.null(resvariates)) {
+                return(list(fleets = fleets,
+                            logs   = logs,
+                            plots  = plots))
+              }
+
+              # ----------------------------------#
+              # Insert stochastic forecast
+              # ----------------------------------#
+
               ## Insert data into correct slots
               if (deterministic) {
 
@@ -238,22 +259,16 @@ setMethod(f = "uncertainty_effortshare",
 
                   ## Fill all iterations with deterministic calculations
                   if (detMethod == "mean") {
-                    fleets@metiers[[mt]]@effshare[,ac(fillyear)] <- mean(effdata[tail(1:nrow(effdata), deterministic_yrs),mt],na.rm = TRUE)
+                    fleets@metiers[[mt]]@effshare[,ac(fillyear),,,,1] <- mean(effdata[tail(1:nrow(effdata), deterministic_yrs),mt],na.rm = TRUE)
                   } else {
-                    fleets@metiers[[mt]]@effshare[,ac(fillyear)] <- apply(exp(resvariates[,mt,]), 1, median, na.rm = TRUE)
+                    fleets@metiers[[mt]]@effshare[,ac(fillyear),,,,1] <- apply(exp(resvariates[,mt,]), 1, median, na.rm = TRUE)
                   }
 
                   ## Overwrite 2+ iterations with stochastically sampled values
                   fleets@metiers[[mt]]@effshare[,ac(fillyear),,,,2:nit] <- resvariates[,mt == colnames(resvariates),]
-                }
+                } ## END loop over metiers
 
               } else {
-
-                ## Fill all iterations with deterministic calculations
-                ## (insurance against failed model forecasts)
-                if (detMethod == "mean") {
-                  fleets@metiers[[mt]]@effshare[,ac(fillyear)] <- mean(effdata[tail(1:nrow(effdata), deterministic_yrs),mt],na.rm = TRUE)
-                }
 
                 ## Overwrite all iterations with stochastically sampled values
                 for(mt in colnames(resvariates)) {

@@ -121,7 +121,7 @@ TMB_DirMissingAR1Hurdle <- function(dat,
     }
 
     ## otherwise, choose the better of the two methods
-    if(which.max(c(sum(pdHess, conv), sum(checkout$pdHess, checkout$conv))) == 1) {
+    if(which.max(c(sum(pdHess, conv, !nans), sum(checkout$pdHess, checkout$conv, !checkout$nans))) == 1) {
       out <- fitMVNDirrw(dat, rw)
     }
 
