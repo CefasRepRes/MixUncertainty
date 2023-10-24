@@ -33,6 +33,8 @@
 #' @param makePlots (Logical) Should the function generate a figure showing
 #'                  observations and model fit and forecasts with uncertainty
 #'                  intervals for each fleet? Defaults to \code{TRUE}
+#' @param removeNonRecent (Logical) Should the function remove fleets that have not
+#'                        registered landings in recent years? Defaults to \code{FALSE}
 #'
 #' @return
 #'
@@ -47,7 +49,8 @@ setGeneric("uncertainty_quotashare", function(fleets,
                                               deterministic_yrs = 3,
                                               verbose       = TRUE,
                                               makeLog       = TRUE,
-                                              makePlots     = TRUE) {
+                                              makePlots     = TRUE,
+                                              removeNonRecent = FALSE) {
   standardGeneric("uncertainty_quotashare")
 })
 
@@ -64,7 +67,8 @@ setMethod(f = "uncertainty_quotashare",
                                 deterministic_yrs = 3,
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
-                                makePlots     = TRUE) {
+                                makePlots     = TRUE,
+                                removeNonRecent = FALSE) {
 
             stop("Methods not yet implemented for 'FLFleetExt'")
 
@@ -83,7 +87,8 @@ setMethod(f = "uncertainty_quotashare",
                                 deterministic_yrs = 3,
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
-                                makePlots     = TRUE) {
+                                makePlots     = TRUE,
+                                removeNonRecent = FALSE) {
 
 
             ## Find number of iterations in object
@@ -198,10 +203,19 @@ setMethod(f = "uncertainty_quotashare",
                                           key   = fleet,
                                           value = landingshare)
 
-              ## remove fleets that catch zero stock across timeseries
+              # Remove fleets that don't catch stock in the recent data-years
+              # This is important for consistency with catchability uncertainty
+              # conditioning. Therefore, use deterministic_yrs to determine the
+              # cut-off. Default to 3 years, cannot be less than 3 years.
+
               stkcatches      <- stkcatches[,colnames(stkcatches) != "year", drop = FALSE]
-              landsharefleets <- which(colSums(stkcatches, na.rm = TRUE) > 0)
-              landsharedata   <- stkcatches[,landsharefleets, drop = FALSE]
+              if (removeNonRecent) {
+                landsharefleets <- which(colSums(tail(stkcatches, max(deterministic_yrs,3)), na.rm = TRUE) > 0)
+              } else {
+                landsharefleets <- which(colSums(stkcatches, na.rm = TRUE) > 0)
+              }
+              landsharedata <- stkcatches[,landsharefleets, drop = FALSE]
+              landsharedata <- sweep(landsharedata, 1, rowSums(landsharedata, na.rm = TRUE), "/")
 
               ## Consider NAs to be zeros
               landsharedata[is.na(landsharedata)] <- 0

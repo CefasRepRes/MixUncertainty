@@ -50,6 +50,10 @@ TMB_DirMissingAR1Hurdle <- function(dat,
   # Identify missing values
   # ---------------------------------#
 
+  # If zero values fall outside the 95% CI of
+  # historical non-zero values, then consider value
+  # to be missing (mark as NA)
+
   ## Check for presence of structural and false zeros
   dat <- findTrueZeros(dat)
 
@@ -121,7 +125,8 @@ TMB_DirMissingAR1Hurdle <- function(dat,
     }
 
     ## otherwise, choose the better of the two methods
-    if(which.max(c(sum(pdHess, conv, !nans), sum(checkout$pdHess, checkout$conv, !checkout$nans))) == 1) {
+    if(which.max(c(sum(pdHess, conv, !nans),
+                   sum(checkout$pdHess, checkout$conv, !checkout$nans))) == 1) {
       out <- fitMVNDirrw(dat, rw)
     }
 
@@ -142,7 +147,8 @@ TMB_DirMissingAR1Hurdle <- function(dat,
     out <- list(out1 = fitNhurdle_fixARrho(dat, rw, logitARrho = 1.75),
                 out2 = fitNhurdle_fixb0b1(dat, rw, logb0 = 2.3, logb1 = 2))
 
-    checklist <- c(checkFail(out$out1, FALSE)$rerun, checkFail(out$out2, FALSE)$rerun)
+    checklist <- c(checkFail(out$out1, FALSE)$rerun,
+                   checkFail(out$out2, FALSE)$rerun)
 
     ## If both fail, stop function here
     if (sum(checklist) == 2) {

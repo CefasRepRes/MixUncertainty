@@ -143,6 +143,10 @@ fit_N_AR1 <- Norm_option <- function(qs,
   ## translate catchability to a log-scale
   logqs <- log(qs)
 
+  # Do not run model if there is no data
+  # in the last 3 years or less than 3
+  # data points
+
   ## Check availability of catchability data
   checkout <- checkCatchability(logqs, qs_years, verbose, makeLog)
 

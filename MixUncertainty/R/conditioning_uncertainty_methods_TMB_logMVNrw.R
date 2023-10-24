@@ -122,7 +122,7 @@ TMB_logMVNrw <- function(qs,
   # If 1 stock caught
   # ==========================================================#
 
-  ## univariate normal random walk if only 1 stock caught
+  ## univariate normal AR1 if only 1 stock caught
   if (ncol(qs) < 2) {
     out <- fit_N_AR1(qs,
                      metier_mt,
@@ -141,7 +141,11 @@ TMB_logMVNrw <- function(qs,
 
       ## check for model fitting issues
       checkout <- checkFail(out, verbose = FALSE)
-      fail <- checkout$fail
+      fail   <- checkout$fail    # no model object returned
+      rerun  <- checkout$rerun   # no model object returned OR non-positive-definite Hessian
+      pdHess <- checkout$pdHess  # non-positive-definite Hessian
+      nans   <- checkout$nans    # NaNs in latent process standard error
+      conv   <- checkout$conv    # convergence == zero
 
       if(verbose) {
         if (fail) {
@@ -190,9 +194,15 @@ TMB_logMVNrw <- function(qs,
       # Insert Forecast into FLR objects
       # ---------------------------------#
 
-      ## if successful, insert forecast into FLR object
-      if (class(resvariates)[1] == "array") {
+      ## Forecast fails if contains NaNs
+      forecastsuccess <- ifelse(class(resvariates)[1] == "array",
+                                ifelse(any(is.nan(resvariates)),
+                                       FALSE,
+                                       TRUE),
+                                FALSE)
 
+      ## if successful, insert forecast into FLR object
+      if (forecastsuccess) {
         if (verbose){
           cat(" N model success |")
         }
@@ -233,7 +243,7 @@ TMB_logMVNrw <- function(qs,
           cat(" Model failed |")
         }
         if (makeLog) {
-          logs[,i] <- "Model failed"
+          logs <- "Model failed"
         }
 
         fail <- TRUE
@@ -336,8 +346,15 @@ TMB_logMVNrw <- function(qs,
         # Insert Forecast into FLR objects
         # ---------------------------------#
 
+        ## Forecast fails if contains NaNs
+        forecastsuccess <- ifelse(class(resvariates)[1] == "array",
+                                  ifelse(any(is.nan(resvariates)),
+                                         FALSE,
+                                         TRUE),
+                                  FALSE)
+
         ## if successful, insert forecast into FLR object
-        if (class(resvariates)[1] == "array") {
+        if (forecastsuccess) {
 
           if (verbose) {
             cat(" MVN model success |")

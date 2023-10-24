@@ -35,6 +35,8 @@
 #' @param makePlots (Logical) Should the function generate a figure showing
 #'                  observations and model fit and forecasts with uncertainty
 #'                  intervals for each fleet? Defaults to \code{TRUE}
+#' @param removeNonRecent (Logical) Should the function remove fleets that have not
+#'                        registered landings in recent years? Defaults to \code{FALSE}
 #'
 #' @return a named list containing:
 #'         - **fleets** - An updated \code{FLFleet}, \code{FLFleets},
@@ -56,7 +58,8 @@ setGeneric("uncertainty_effortshare", function(fleets,
                                                detMethod     = "mean",
                                                verbose       = TRUE,
                                                makeLog       = TRUE,
-                                               makePlots     = TRUE) {
+                                               makePlots     = TRUE,
+                                               removeNonRecent = FALSE) {
   standardGeneric("uncertainty_effortshare")
 })
 
@@ -73,7 +76,8 @@ setMethod(f = "uncertainty_effortshare",
                                 detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
-                                makePlots     = TRUE) {
+                                makePlots     = TRUE,
+                                removeNonRecent = FALSE) {
 
             ## Function expects that multiple iterations are present
             if(dims(fleets[[f]])$iter < 2)
@@ -96,7 +100,8 @@ setMethod(f = "uncertainty_effortshare",
                                 detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
-                                makePlots     = TRUE) {
+                                makePlots     = TRUE,
+                                removeNonRecent = FALSE) {
 
             ## make a log file
             if (makeLog == TRUE) {
@@ -121,7 +126,8 @@ setMethod(f = "uncertainty_effortshare",
                                                detMethod     = detMethod,
                                                verbose       = verbose,
                                                makeLog       = makeLog,
-                                               makePlots     = makePlots)
+                                               makePlots     = makePlots,
+                                               removeNonRecent = removeNonRecent)
 
               fleets[[f]] <- out_f$fleets
               logs[[f]]   <- out_f$logs
@@ -148,7 +154,8 @@ setMethod(f = "uncertainty_effortshare",
                                 detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
-                                makePlots     = TRUE) {
+                                makePlots     = TRUE,
+                                removeNonRecent = FALSE) {
 
             ## Find number of iterations in object
             nit <- min(dims(fleets)$iter)
@@ -169,25 +176,37 @@ setMethod(f = "uncertainty_effortshare",
             ## If TACyear > datayear + 1, then fill intermediate years too
             fillyear <- (as.integer(tail(datayears,1))+1):TACyear
 
+            # ----------------#
+            # Extract data
+            # ----------------#
+
+            ## Extract metier effortshare for fleet f
+            effshare_f <- sapply(fleets@metiers@names, function(mt) {
+              fleets@metiers[[mt]]@effshare[,ac(datayears),,,,1]
+            }, simplify = "array")[,,,,,,,drop = TRUE]
+
+            ## if only one metier, coerce to matrix
+            if(!is.matrix(effshare_f)) {
+              effshare_f <- as.matrix(effshare_f)
+              colnames(effshare_f) <- fleets@metiers@names
+            }
+
+            # -----------------------------------------------------------------#
+            # Handle cases where historical effort-share is consistently zero
+            # -----------------------------------------------------------------#
+
+            ## consider consistant historical zero as zero in all iterations
+            if (removeNonRecent) {
+              effidx <- colSums(tail(effshare_f, max(deterministic_yrs,3)), na.rm = TRUE) > 0
+            } else {
+              effidx <- colMeans(effshare_f) > 0
+            }
+            effdata <- effshare_f[, effidx, drop = FALSE]
+            effdata <- sweep(effdata, 1, rowSums(effdata, na.rm = TRUE), "/")
+            effdata_mt <- colnames(effdata)
+
             ## Only run if multiple metiers are present
-            if (length(names(fleets@metiers)) > 1) {
-
-              # ----------------#
-              # Extract data
-              # ----------------#
-
-              ## Extract metier effortshare for fleet f
-              effshare_f <- sapply(fleets@metiers@names, function(mt) {
-                fleets@metiers[[mt]]@effshare[,ac(datayears),,,,1]
-              }, simplify = "array")[,,,,,,,drop = TRUE]
-
-              # -----------------------------------------------------------------#
-              # Handle cases where historical effort-share is consistently zero
-              # -----------------------------------------------------------------#
-
-              ## consider consistant historical zero as zero in all iterations
-              effdata <- effshare_f[, colMeans(effshare_f) > 0]
-              effdata_mt <- colnames(effdata)
+            if (length(effdata_mt) > 1) {
 
               # --------------------#
               # Handle 0/1 cases
@@ -277,7 +296,10 @@ setMethod(f = "uncertainty_effortshare",
               }
             } else { ### If only 1 metier
 
-              fleets@metiers[[1]]@effshare[,ac(fillyear)] <- 1
+              ## loop because we might have removed metiers with consistent zero allocation
+              for(ii in fleets@metiers@names) {
+                fleets@metiers[[ii]]@effshare[,ac(fillyear)] <- 1
+              }
 
               if (verbose)
                 cat(" < 2 metier |")
@@ -311,7 +333,8 @@ setMethod(f = "uncertainty_effortshare",
                                 detMethod     = "mean",
                                 verbose       = TRUE,
                                 makeLog       = TRUE,
-                                makePlots     = TRUE) {
+                                makePlots     = TRUE,
+                                removeNonRecent = FALSE) {
 
             ## Find number of iterations in object
             nit <- min(dims(fleets)$iter)
@@ -355,7 +378,8 @@ setMethod(f = "uncertainty_effortshare",
                                                detMethod     = detMethod,
                                                verbose       = verbose,
                                                makeLog       = makeLog,
-                                               makePlots     = makePlots)
+                                               makePlots     = makePlots,
+                                               removeNonRecent = removeNonRecent)
 
               fleets[[f]] <- out_f$fleets
               logs[[f]]   <- out_f$logs
