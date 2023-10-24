@@ -11,10 +11,10 @@
 uncertainty_catchability(
   fleets,
   method = "TMB_logMVNrw",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 3,
   deterministic = TRUE,
+  deterministic_yrs = 3,
   detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
@@ -25,10 +25,10 @@ uncertainty_catchability(
 \S4method{uncertainty_catchability}{FLFleetExt}(
   fleets,
   method = "TMB_logMVNrw",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 3,
   deterministic = TRUE,
+  deterministic_yrs = 3,
   detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
@@ -38,10 +38,10 @@ uncertainty_catchability(
 \S4method{uncertainty_catchability}{FLFleetsExt}(
   fleets,
   method = "TMB_logMVNrw",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 3,
   deterministic = TRUE,
+  deterministic_yrs = 3,
   detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
@@ -52,10 +52,10 @@ uncertainty_catchability(
 \S4method{uncertainty_catchability}{FLFleet}(
   fleets,
   method = "TMB_logMVNrw",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 3,
   deterministic = TRUE,
+  deterministic_yrs = 3,
   detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
@@ -65,10 +65,10 @@ uncertainty_catchability(
 \S4method{uncertainty_catchability}{FLFleets}(
   fleets,
   method = "TMB_logMVNrw",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 3,
   deterministic = TRUE,
+  deterministic_yrs = 3,
   detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
@@ -84,20 +84,20 @@ uncertainty_catchability(
 generate stochastic forecasts. Using the default is highly
 recommended.}
 
-\item{datayear}{(Integer) The final data year in the fleets object}
+\item{datayears}{A vector of historic years used to estimate future fleet
+catchability}
 
 \item{TACyear}{(Integer) The projection year in the fleets object}
-
-\item{nyrs}{(Integer) The number of historic years used to estimate
-future catchability. Defaults to 3. Recommend > 10 if
-using a random walk model.}
 
 \item{deterministic}{(Logical) Should the results for first iteration be
 a deterministic average of the historical period? Defaults
 to \code{TRUE}}
 
+\item{deterministic_yrs}{(Integer) The number of recent data years to use in
+the deterministic calculation. Defaults to 3.}
+
 \item{detMethod}{(Character) The method to calculate the deterministic average.
-If "mean" then a simple mean of the most recent three data years
+If "mean" then a simple mean of the most recent data years
 is used. Otherwise, the median of the stochastic forecast is
 used.}
 

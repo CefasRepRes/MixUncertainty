@@ -5,17 +5,7 @@
 \alias{fit_N_AR1}
 \title{Wrapper function to fit latent AR1 with univariate normal intervals}
 \usage{
-fit_N_AR1(
-  qs,
-  metier_mt,
-  qs_years,
-  fillyear,
-  deterministic,
-  detMethod,
-  verbose,
-  makeLog,
-  makePlots
-)
+fit_N_AR1(qs, metier_mt, qs_years, fillyear, verbose, makeLog)
 }
 \arguments{
 \item{qs}{A matrix of time-series observations for catchability data where
@@ -27,15 +17,9 @@ cols = years and rows = stocks}
 
 \item{fillyear}{description}
 
-\item{deterministic}{description}
-
-\item{detMethod}{description}
-
 \item{verbose}{description}
 
 \item{makeLog}{description}
-
-\item{makePlots}{description}
 }
 \value{
 A list containing:

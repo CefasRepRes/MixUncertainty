@@ -4,14 +4,12 @@
 \alias{calculate_landingshare}
 \title{Calculate proportional fleet share of stock landings}
 \usage{
-calculate_landingshare(fleets, datayear, nyrs)
+calculate_landingshare(fleets, datayears)
 }
 \arguments{
 \item{fleets}{An \code{FLFleets} object}
 
-\item{datayear}{The final year of data in the \code{FLFleets} object}
-
-\item{nyrs}{The number of recent data years to include in calculations}
+\item{datayears}{A vector of historic data years to include in calculations}
 }
 \value{
 A data frame with variables: 'year', 'stock', 'fleet' and 'landingshare'

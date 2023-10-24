@@ -11,61 +11,71 @@
 uncertainty_effortshare(
   fleets,
   method = "TMB_DirMissingAR1Hurdle",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 4,
   deterministic = TRUE,
+  deterministic_yrs = 3,
+  detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
-  makePlots = TRUE
+  makePlots = TRUE,
+  removeNonRecent = FALSE
 )
 
 \S4method{uncertainty_effortshare}{FLFleetExt}(
   fleets,
   method = "TMB_DirMissingAR1Hurdle",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 4,
   deterministic = TRUE,
+  deterministic_yrs = 3,
+  detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
-  makePlots = TRUE
+  makePlots = TRUE,
+  removeNonRecent = FALSE
 )
 
 \S4method{uncertainty_effortshare}{FLFleetsExt}(
   fleets,
   method = "TMB_DirMissingAR1Hurdle",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 4,
   deterministic = TRUE,
+  deterministic_yrs = 3,
+  detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
-  makePlots = TRUE
+  makePlots = TRUE,
+  removeNonRecent = FALSE
 )
 
 \S4method{uncertainty_effortshare}{FLFleet}(
   fleets,
   method = "TMB_DirMissingAR1Hurdle",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 4,
   deterministic = TRUE,
+  deterministic_yrs = 3,
+  detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
-  makePlots = TRUE
+  makePlots = TRUE,
+  removeNonRecent = FALSE
 )
 
 \S4method{uncertainty_effortshare}{FLFleets}(
   fleets,
   method = "TMB_DirMissingAR1Hurdle",
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 4,
   deterministic = TRUE,
+  deterministic_yrs = 3,
+  detMethod = "mean",
   verbose = TRUE,
   makeLog = TRUE,
-  makePlots = TRUE
+  makePlots = TRUE,
+  removeNonRecent = FALSE
 )
 }
 \arguments{
@@ -76,16 +86,22 @@ uncertainty_effortshare(
 generate stochastic forecasts. Using the default is highly
 recommended.}
 
-\item{datayear}{(Integer) The final data year in the fleets object}
+\item{datayears}{A vector of historic years used to estimate future fleet
+effort-share}
 
 \item{TACyear}{(Integer) The projection year in the fleets object}
-
-\item{nyrs}{(Integer) The number of historic years used to estimate
-future effort-share}
 
 \item{deterministic}{(Logical) Should the results for first iteration be
 a simple mean of the historical period? Defaults
 to \code{TRUE}}
+
+\item{deterministic_yrs}{(Integer) The number of recent data years to use in
+the deterministic calculation. Defaults to 3.}
+
+\item{detMethod}{(Character) The method to calculate the deterministic average.
+If "mean" then a simple mean of the most recent data years
+is used. Otherwise, the median of the stochastic forecast is
+used.}
 
 \item{verbose}{(Logical) Should the function print progress? Defaults
 to \code{TRUE}}
@@ -96,6 +112,9 @@ performance for each fleet? Defaults to \code{TRUE}}
 \item{makePlots}{(Logical) Should the function generate a figure showing
 observations and model fit and forecasts with uncertainty
 intervals for each fleet? Defaults to \code{TRUE}}
+
+\item{removeNonRecent}{(Logical) Should the function remove fleets that have not
+registered landings in recent years? Defaults to \code{FALSE}}
 }
 \value{
 a named list containing:

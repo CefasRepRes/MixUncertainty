@@ -10,6 +10,7 @@ insert_forecast(
   qs_years,
   metier_mt,
   deterministic,
+  deterministic_yrs,
   detMethod,
   nit
 )

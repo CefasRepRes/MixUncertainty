@@ -12,10 +12,18 @@ TMB_DirMissingAR1Hurdle(dat, nit, fillyear, verbose, makeLog, makePlots)
 
 \item{nit}{(Integer) the number of replicate parameter trajectories to sample}
 
-\item{makePlots}{}
+\item{fillyear}{Vector of intermediate and forecast years to be sampled for.}
+
+\item{verbose}{(Logical) Should the function print progress?}
+
+\item{makeLog}{(Logical) Should the function generate a log of the methods
+applied to each variable (and their success)?}
+
+\item{makePlots}{(Logical) Should the function generate plots showing model
+fit to data for each stock?}
 }
 \value{
-An matrix of sampled parameters
+An matrix of sampled parameter values
 }
 \description{
 Function takes a time-series of metier effort-share data as a matrix and

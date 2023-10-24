@@ -9,6 +9,7 @@ TMB_logMVNrw(
   metier_mt,
   fillyear,
   deterministic,
+  deterministic_yrs,
   detMethod,
   verbose = TRUE,
   makeLog = TRUE,

@@ -1,7 +1,7 @@
 Package: MixUncertainty
 Type: Package
 Title: An R package to stochastically forecast mixed fisheries model parameters
-Version: 0.2.0
+Version: 0.3.0
 Author: Matthew C. Pace and Paul J. Dolder
 Maintainer: Matt Pace <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)

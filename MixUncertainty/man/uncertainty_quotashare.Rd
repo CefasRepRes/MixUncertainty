@@ -10,42 +10,42 @@ uncertainty_quotashare(
   fleets,
   method = "TMB_DirMissingAR1Hurdle",
   quotashare = NULL,
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 4,
   deterministic = TRUE,
   deterministic_yrs = 3,
   verbose = TRUE,
   makeLog = TRUE,
-  makePlots = TRUE
+  makePlots = TRUE,
+  removeNonRecent = FALSE
 )
 
 \S4method{uncertainty_quotashare}{FLFleetsExt}(
   fleets,
   method = "TMB_DirMissingAR1Hurdle",
   quotashare = NULL,
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 4,
   deterministic = TRUE,
   deterministic_yrs = 3,
   verbose = TRUE,
   makeLog = TRUE,
-  makePlots = TRUE
+  makePlots = TRUE,
+  removeNonRecent = FALSE
 )
 
 \S4method{uncertainty_quotashare}{FLFleets}(
   fleets,
   method = "TMB_DirMissingAR1Hurdle",
   quotashare = NULL,
-  datayear = NULL,
+  datayears = NULL,
   TACyear = NULL,
-  nyrs = 4,
   deterministic = TRUE,
   deterministic_yrs = 3,
   verbose = TRUE,
   makeLog = TRUE,
-  makePlots = TRUE
+  makePlots = TRUE,
+  removeNonRecent = FALSE
 )
 }
 \arguments{
@@ -59,12 +59,10 @@ recommended.}
 \item{quotashare}{(Optional) A data frame containing: year, stock, fleet
 and landingshare.}
 
-\item{datayear}{(Integer) The final data year in the fleets object}
+\item{datayears}{A vector of historic years used to estimate future stock
+quota-share}
 
 \item{TACyear}{(Integer) The projection year in the fleets object}
-
-\item{nyrs}{(Integer) The number of historic years used to estimate
-future fleet quota-share}
 
 \item{deterministic}{(Logical) Should the results for first iteration be
 a simple mean of the historical period? Defaults
@@ -82,6 +80,9 @@ performance for each fleet? Defaults to \code{TRUE}}
 \item{makePlots}{(Logical) Should the function generate a figure showing
 observations and model fit and forecasts with uncertainty
 intervals for each fleet? Defaults to \code{TRUE}}
+
+\item{removeNonRecent}{(Logical) Should the function remove fleets that have not
+registered landings in recent years? Defaults to \code{FALSE}}
 }
 \description{
 Function takes a \code{FLFleet}, \code{FLFleets}, \code{FLFleetExt} or a
