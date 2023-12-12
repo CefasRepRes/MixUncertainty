@@ -12,7 +12,7 @@ MixUncertainty can be installed using the 'devtools' package
 
 ```{r}
 install.packages("devtools")
-devtools::install_github("pacematt/MixUncertainty/MixUncertainty")
+devtools::install_github("CefasRepRes/MixUncertainty/MixUncertainty")
 ```
 
 ## Application
